@@ -22,8 +22,7 @@ def init():
 
 
 # 背景绘制
-def bg_draw():
-    global tag
+def bg_draw(tag):
     # 背景绘制
     if tag == 0:
         screen.blit(start_img, (0, 0))
@@ -38,4 +37,3 @@ def bg_draw():
 # 更新窗口内容
 def Update():
     pygame.display.update()
-
