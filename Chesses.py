@@ -2,16 +2,14 @@ import math
 
 
 # 左上角(0,0)坐标的为(30,30)，格子间距离57
-# Coordinate表示游戏坐标；Position表示棋子位置，左上角为(0,0)，右上角为(0,8)
-# coX,coY				posX,posY
+# coX,coY表示网格坐标；posX,posY表示棋子位置，左上角为(0,0)，右上角为(0,8)
 
-
-# 棋子位置转换为游戏坐标
+# 棋子位置转换为网格坐标
 def Pos2Co(posX, posY):
     return 57.5 * posX + 30, 57.5 * posY + 30
 
 
-# 游戏坐标转换为棋子位置
+# 网格坐标转换为棋子位置
 def Co2Pos(coX, coY):
     x = coX // 57.5
     x = x if x >= 0 else 0
