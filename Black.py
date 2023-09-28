@@ -9,7 +9,6 @@ buf_size = 512  # 传输的尺寸限制
 tag = 0  # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，3表示结束界面
 button_start = 0  # 按下’创建房间‘按钮置为1
 button_join = 0  # 按下’加入房间‘按钮置为1
-board_choice = 1  # 棋盘选择标志
 
 
 class Mess:  # 用于传送数据的类
@@ -52,7 +51,7 @@ def main():
         if tag == 0:
             build_connect(button_start, button_join)
 
-        time.sleep(0.1)
+        time.sleep(0.01)
 
         # 显示screen内容
         Draw_Related.Update()
