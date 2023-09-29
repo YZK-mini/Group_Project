@@ -1,13 +1,17 @@
 import pygame
 import sys
 
+
 class objection:
     # 初始化函数，供black和red调用
     def __init__(self):
-        self.tag=0
+
+        self.tag = 0
+        self.start_OR_join = 0
+
         # 初始化pygame
         pygame.init()
-        #修改游戏窗口标题
+        # 修改游戏窗口标题
         pygame.display.set_caption('中国象棋')
         # 创建窗口
         self.screen = pygame.display.set_mode((521, 577))
@@ -20,11 +24,13 @@ class objection:
         # 按钮’启动游戏‘左上（128，272）右下（390，349），按钮’加入游戏‘左上（126，389）右下（389，462）
 
         self.wait_img = pygame.image.load('images/等待界面.png')
-        self.retn_button1 = (165, 313)
-        self.retn_button2 = (340, 379)
+        self.return_button1 = (165, 313)
+        self.return_button2 = (340, 379)
         # 按钮'返回'左上（165，313）右下（340，379）
 
         self.board_img = pygame.image.load('images/棋盘.png')
+
+        self.end_img = 0
 
         self.red_return1 = (115, 299)
         self.red_return2 = (394, 378)
@@ -36,7 +42,6 @@ class objection:
         self.black_exit1 = (183, 419)
         self.black_exit2 = (318, 483)
         # 黑方胜界面中，按钮’返回开始菜单‘左上（114，289）右下（377，366），按钮'退出'左上(183，419)右下（318，483）
-
 
     # 背景绘制，tg即tag
     def bg_draw(self):
@@ -59,14 +64,9 @@ class objection:
             self.end_img = pygame.image.load('images/黑方胜.png')
             self.screen.blit(self.end_img, (0, 0))
 
-
-    # 当black与red建立连接后会调用此函数，将tag置为2，即双方进入游戏状态
-    def begin(self):
-        self.tag = 2
-
-
     # 事件检测函数
     def check_movement(self):
+
         # 事件检测
         for event in pygame.event.get():
             # 退出事件
@@ -81,56 +81,62 @@ class objection:
                     # 调用鼠标事件处理函数，传入鼠标坐标
                     self.mouse_solve(pygame.mouse.get_pos())
                     return self.tag
+
         return self.tag
 
-
     # 鼠标事件处理函数
-    def mouse_solve(self,mouse_pos):
+    def mouse_solve(self, mouse_pos):
+
         # 若处于开始界面
         if self.tag == 0:
             # 判断是否点击‘启动游戏’按钮
-            if self.start_button1[0] < mouse_pos[0] < self.start_button2[0] and self.start_button1[1] < mouse_pos[1] < self.start_button2[1]:
+            if (self.start_button1[0] < mouse_pos[0] < self.start_button2[0]) and (
+                    self.start_button1[1] < mouse_pos[1] < self.start_button2[1]):
                 self.tag = 1
+                self.start_OR_join = 1
                 return
             # 判断是否点击‘加入游戏’按钮
-            if self.join_button1[0] < mouse_pos[0] < self.join_button2[0] and self.join_button1[1] < mouse_pos[1] < self.join_button2[1]:
-                self.tag = 1
+            if (self.join_button1[0] < mouse_pos[0] < self.join_button2[0]) and (
+                    self.join_button1[1] < mouse_pos[1] < self.join_button2[1]):
+                self.tag = 2
+                self.start_OR_join = 2
                 return
+
         # 若处于等待界面
         if self.tag == 1:
             # 判断是否点击‘返回’按钮
-            if self.retn_button1[0] < mouse_pos[0] < self.retn_button2[0] and self.retn_button1[1] < mouse_pos[1] < self.retn_button2[1]:
+            if (self.return_button1[0] < mouse_pos[0] < self.return_button2[0]) and (
+                    self.return_button1[1] < mouse_pos[1] < self.return_button2[1]):
                 self.tag = 0
                 return
+
         # 若处于结束界面
         if self.tag == 30:
             # 判断是否点击’返回开始界面‘按钮
-            if self.red_return1[0] < mouse_pos[0] < self.red_return2[0] and self.red_return1[1] < mouse_pos[1] < self.red_return2[1]:
+            if (self.red_return1[0] < mouse_pos[0] < self.red_return2[0]) and (
+                    self.red_return1[1] < mouse_pos[1] < self.red_return2[1]):
                 self.tag = 0
+                self.start_OR_join = 0
                 return
             # 判断是否点击'退出'按钮
-            if self.red_exit1[0] < mouse_pos[0] < self.red_exit2[0] and self.red_exit1[1] < mouse_pos[1] < self.red_exit2[1]:
+            if (self.red_exit1[0] < mouse_pos[0] < self.red_exit2[0]) and (
+                    self.red_exit1[1] < mouse_pos[1] < self.red_exit2[1]):
                 pygame.quit()
                 sys.exit()
         if self.tag == 31:
             # 判断是否点击’返回开始界面‘按钮
-            if self.black_return1[0] < mouse_pos[0] < self.black_return2[0] and self.black_return1[1] < mouse_pos[1] < self.black_return2[1]:
+            if (self.black_return1[0] < mouse_pos[0] < self.black_return2[0]) and (
+                    self.black_return1[1] < mouse_pos[1] < self.black_return2[1]):
                 self.tag = 0
+                self.start_OR_join = 0
                 return
             # 判断是否点击'退出'按钮
-            if self.black_exit1[0] < mouse_pos[0] < self.black_exit2[0] and self.black_exit1[1] < mouse_pos[1] < self.black_exit2[1]:
+            if (self.black_exit1[0] < mouse_pos[0] < self.black_exit2[0]) and (
+                    self.black_exit1[1] < mouse_pos[1] < self.black_exit2[1]):
                 pygame.quit()
                 sys.exit()
 
-
     # 更新窗口内容
-    def Update(self):
+    @staticmethod
+    def Update():
         pygame.display.update()
-
-#以下为测试行
-red=objection()
-red.tag=31
-while True:
-    red.bg_draw()
-    red.check_movement()
-    red.Update()
