@@ -6,8 +6,8 @@ class objection:
     # 初始化函数，供black和red调用
     def __init__(self):
 
-        self.tag = 0
-        self.start_OR_join = 0
+        self.tag = 0  # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，3表示结束界面
+        self.start_OR_join = 0  # 开始界面按钮标识，0表示未选，1表示选择‘启动游戏’，2表示选择‘加入游戏’
 
         # 初始化pygame
         pygame.init()
@@ -92,12 +92,14 @@ class objection:
             # 判断是否点击‘启动游戏’按钮
             if (self.start_button1[0] < mouse_pos[0] < self.start_button2[0]) and (
                     self.start_button1[1] < mouse_pos[1] < self.start_button2[1]):
+                # 修改标识符
                 self.tag = 1
                 self.start_OR_join = 1
                 return
             # 判断是否点击‘加入游戏’按钮
             if (self.join_button1[0] < mouse_pos[0] < self.join_button2[0]) and (
                     self.join_button1[1] < mouse_pos[1] < self.join_button2[1]):
+                # 修改标识符
                 self.tag = 2
                 self.start_OR_join = 2
                 return
@@ -107,6 +109,7 @@ class objection:
             # 判断是否点击‘返回’按钮
             if (self.return_button1[0] < mouse_pos[0] < self.return_button2[0]) and (
                     self.return_button1[1] < mouse_pos[1] < self.return_button2[1]):
+                # 修改标识符
                 self.tag = 0
                 return
 
@@ -115,6 +118,7 @@ class objection:
             # 判断是否点击’返回开始界面‘按钮
             if (self.red_return1[0] < mouse_pos[0] < self.red_return2[0]) and (
                     self.red_return1[1] < mouse_pos[1] < self.red_return2[1]):
+                # 修改标识符
                 self.tag = 0
                 self.start_OR_join = 0
                 return
@@ -127,6 +131,7 @@ class objection:
             # 判断是否点击’返回开始界面‘按钮
             if (self.black_return1[0] < mouse_pos[0] < self.black_return2[0]) and (
                     self.black_return1[1] < mouse_pos[1] < self.black_return2[1]):
+                # 修改标识符
                 self.tag = 0
                 self.start_OR_join = 0
                 return
