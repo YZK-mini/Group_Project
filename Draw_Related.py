@@ -13,6 +13,9 @@ class objection:
         pygame.init()
         # 修改游戏窗口标题
         pygame.display.set_caption('中国象棋')
+        # 修改游戏窗口图标
+        icon = pygame.image.load("images/图标.png")
+        pygame.display.set_icon(icon)
         # 创建窗口
         self.screen = pygame.display.set_mode((521, 577))
         # 背景图片
