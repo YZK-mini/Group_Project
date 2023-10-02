@@ -102,6 +102,7 @@ def main():
     while True:
 
         ps_tag = Black.tag
+        Black.clock.tick(60)
 
         # 操作信息检测
         Black.tag = Black.check_movement()

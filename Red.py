@@ -102,6 +102,7 @@ def main():
     while True:
 
         ps_tag = Red.tag
+        Red.clock.tick(60)
 
         # 操作信息检测
         Red.tag = Red.check_movement()

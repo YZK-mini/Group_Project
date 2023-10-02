@@ -56,6 +56,8 @@ class objection:
 
         # 初始化pygame
         pygame.init()
+        #控制帧率
+        self.clock = pygame.time.Clock()
         # 修改游戏窗口标题
         pygame.display.set_caption('中国象棋')
         # 修改游戏窗口图标
@@ -195,6 +197,7 @@ class objection:
                 pass
             # 若为己方棋子，且轮到本方下棋则显示选中
             else:
+                image_selected = False  # 是否选中图片的标志
                 self.choice = Pos2load(cur[0], cur[1])
 
         # 若处于结束界面
