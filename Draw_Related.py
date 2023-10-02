@@ -1,13 +1,58 @@
 import pygame
 import sys
+import math
+
+# 棋子及其对应数字标识
+chess_number = {
+    1: 'images/红车.png',
+    2: 'images/红马.png',
+    3: 'images/红相.png',
+    4: 'images/红仕.png',
+    5: 'images/红帅.png',
+    6: 'images/红炮.png',
+    7: 'images/红兵.png',
+
+    11: 'images/黑车.png',
+    12: 'images/黑马.png',
+    13: 'images/黑象.png',
+    14: 'images/黑士.png',
+    15: 'images/黑将.png',
+    16: 'images/黑炮.png',
+    17: 'images/黑卒.png',
+}
+
+
+# 将网格位置转化为窗口坐标
+def Pos2load(posX, posY):
+    return 57.5 * posX + 2.5, 57.5 * posY + 2.5
+
+
+# 点击坐标转换为棋子位置
+def Co2Pos(coX, coY):
+    x = coX // 57.5
+    x = x if x >= 0 else 0
+    x = x if x <= 8 else 8
+    x = math.floor(x)
+    y = coY // 57.5
+    y = y if y >= 0 else 0
+    y = y if y <= 9 else 9
+    y = math.floor(y)
+    return x, y
 
 
 class objection:
     # 初始化函数，供black和red调用
     def __init__(self):
-
-        self.tag = 0  # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，3表示结束界面
-        self.start_OR_join = 0  # 开始界面按钮标识，0表示未选，1表示选择‘启动游戏’，2表示选择‘加入游戏’
+        # 红方或黑方标志，0表示红方，1表示黑方
+        self.side = 0
+        # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，3表示结束界面
+        self.tag = 0
+        # 开始界面按钮标识，0表示未选，1表示选择‘启动游戏’，2表示选择‘加入游戏’
+        self.start_OR_join = 0
+        # 选中的位置
+        self.choice = (-1, -1)
+        # 行动标志，0 表示不可行动，1 表示可行动
+        self.able_move = 0
 
         # 初始化pygame
         pygame.init()
@@ -18,6 +63,7 @@ class objection:
         pygame.display.set_icon(icon)
         # 创建窗口
         self.screen = pygame.display.set_mode((521, 577))
+
         # 背景图片
         self.start_img = pygame.image.load('images/开始界面.png')
         self.start_button1 = (128, 272)
@@ -45,6 +91,22 @@ class objection:
         self.black_exit1 = (183, 419)
         self.black_exit2 = (318, 483)
         # 黑方胜界面中，按钮’返回开始菜单‘左上（114，289）右下（377，366），按钮'退出'左上(183，419)右下（318，483）
+
+        self.block_image = pygame.image.load('images/四方形标志.png')
+
+        # 棋子初始坐标（红方版）
+        self.chess_info = [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
 
     # 背景绘制，tg即tag
     def bg_draw(self):
@@ -103,8 +165,8 @@ class objection:
             if (self.join_button1[0] < mouse_pos[0] < self.join_button2[0]) and (
                     self.join_button1[1] < mouse_pos[1] < self.join_button2[1]):
                 # 修改标识符
-                self.tag = 2
                 self.start_OR_join = 2
+                self.tag = 2
                 return
 
         # 若处于等待界面
@@ -115,6 +177,25 @@ class objection:
                 # 修改标识符
                 self.tag = 0
                 return
+
+        # 若处于游戏界面
+        if self.tag == 2:
+            # 判断点击的是哪一个棋子
+            cur = Co2Pos(mouse_pos[0], mouse_pos[1])
+            # 若为空处，无反应
+            if self.chess_info[cur[1]][cur[0]] == 0:
+                print('?')
+                pass
+            # 若为对方棋子，或未到本方下棋，则无反应
+            elif self.side != math.floor(self.chess_info[cur[1]][cur[0]] / 10):
+                print('no')
+                pass
+            elif self.able_move == 0:
+                print('wait')
+                pass
+            # 若为己方棋子，且轮到本方下棋则显示选中
+            else:
+                self.choice = Pos2load(cur[0], cur[1])
 
         # 若处于结束界面
         if self.tag == 30:
@@ -143,6 +224,17 @@ class objection:
                     self.black_exit1[1] < mouse_pos[1] < self.black_exit2[1]):
                 pygame.quit()
                 sys.exit()
+
+    def draw_chess(self):
+        for i in range(10):
+            for j in range(9):
+                if self.chess_info[i][j] == 0:
+                    continue
+                else:
+                    temp_image = pygame.image.load(chess_number.get(self.chess_info[i][j]))
+                    self.screen.blit(temp_image, Pos2load(j, i))
+        if self.choice != (-1, -1):
+            self.screen.blit(self.block_image, self.choice)
 
     # 更新窗口内容
     @staticmethod
