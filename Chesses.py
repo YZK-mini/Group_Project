@@ -6,7 +6,7 @@ import math
 
 # 棋子位置转换为网格坐标
 def Pos2Co(posX, posY):
-    return 57.5 * posX + 30, 57.5 * posY + 30
+    return 57.5 * posX + 2.5, 57.5 * posY + 2.5
 
 
 # 网格坐标转换为棋子位置
