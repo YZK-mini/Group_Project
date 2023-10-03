@@ -244,7 +244,7 @@ class objection:
 
     # 移动棋子到对应位置
     def move_chess(self):
-        # 交换棋子信息矩阵中前后位置的值，实现移动（此处应有判断能否进行的条件，在Chesses中实现，再import）
+        # 交换棋子信息矩阵中前后位置的值，实现移动（此处应有判断能否进行的条件，在Chess中实现，再import）
         chess = self.chess_info[self.choice2[1]][self.choice2[0]]
         self.chess_info[self.choice2[1]][self.choice2[0]] = 0
         self.chess_info[self.cur[1]][self.cur[0]] = chess
