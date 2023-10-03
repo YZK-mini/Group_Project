@@ -197,7 +197,7 @@ class objection:
                     pass
 
             # 若选中对方棋子
-            elif self.side != self.chess_info[self.cur[1]][self.cur[0]] // 10:
+            elif self.side != math.floor(self.chess_info[self.cur[1]][self.cur[0]] / 10):
                 # 若已选中本方棋子，则移动吞并
                 if self.image_selected:
                     self.move_chess()
@@ -258,8 +258,12 @@ class objection:
 
     # 移动棋子到对应位置
     def move_chess(self):
-        if self.cur in Chess.where_can_move(self.chess_info, self.choice):
-            # 交换棋子信息矩阵中前后位置的值，实现移动
+        # 交换棋子信息矩阵中前后位置的值，实现移动
+        # cur_pos = (self.choice_ready[0], self.choice_ready[1])
+        next_pos = (self.cur[0], self.cur[1])
+        can_moves = Chess.where_can_move(self.chess_info, self.choice_ready)
+        # 判断能否走子
+        if next_pos in can_moves:
             chess = self.chess_info[self.choice_ready[1]][self.choice_ready[0]]
             self.chess_info[self.choice_ready[1]][self.choice_ready[0]] = 0
             self.chess_info[self.cur[1]][self.cur[0]] = chess
@@ -268,6 +272,9 @@ class objection:
             # 走完后，当前无选中位置
             self.image_selected = False
             self.choice = (-1, -1)
+        else:
+            print('no')
+            pass
 
     # 更新窗口内容
     @staticmethod
