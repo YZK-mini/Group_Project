@@ -1,6 +1,7 @@
 import pygame
 import sys
 import math
+import Chess
 
 # 棋子及其对应数字标识
 chess_number = {
@@ -258,14 +259,22 @@ class objection:
     # 移动棋子到对应位置
     def move_chess(self):
         # 交换棋子信息矩阵中前后位置的值，实现移动（此处应有判断能否进行的条件，在Chess中实现，再import）
-        chess = self.chess_info[self.choice2[1]][self.choice2[0]]
-        self.chess_info[self.choice2[1]][self.choice2[0]] = 0
-        self.chess_info[self.cur[1]][self.cur[0]] = chess
-        # 轮到对方行动
-        self.able_move = 0
-        # 走完后，当前无选中位置
-        self.image_selected = False
-        self.choice = (-1, -1)
+        curpos = (self.choice2[0], self.choice2[1])
+        nextpos = (self.cur[0], self.cur[1])
+        canmoves = Chess.where_can_move(self.chess_info, curpos)
+        #判断能否走子
+        if nextpos in canmoves:
+            chess = self.chess_info[self.choice2[1]][self.choice2[0]]
+            self.chess_info[self.choice2[1]][self.choice2[0]] = 0
+            self.chess_info[self.cur[1]][self.cur[0]] = chess
+            # 轮到对方行动
+            self.able_move = 0
+            # 走完后，当前无选中位置
+            self.image_selected = False
+            self.choice = (-1, -1)
+        else:
+            print('no')
+            pass
 
     # 更新窗口内容
     @staticmethod
