@@ -183,13 +183,15 @@ class objection:
         # 若处于游戏界面
         if self.tag == 2:
             # 判断点击的是哪一个棋子
-            cur = Co2Pos(mouse_pos[0], mouse_pos[1])
-            # 若为空处，无反应
-            if self.chess_info[cur[1]][cur[0]] == 0:
+            self.cur = Co2Pos(mouse_pos[0], mouse_pos[1])
+            # 若为空处并且没有选中图片无反应；若为空处并且已经选中则移动图片
+            if self.chess_info[self.cur[1]][self.cur[0]]==0 and self.image_selected == False:               
                 print('?')
                 pass
+            elif self.chess_info[self.cur[1]][self.cur[0]]==0 and self.image_selected == True:
+                self.move_chess()
             # 若为对方棋子，或未到本方下棋，则无反应
-            elif self.side != math.floor(self.chess_info[cur[1]][cur[0]] / 10):
+            elif self.side != math.floor(self.chess_info[self.cur[1]][self.cur[0]] / 10):
                 print('no')
                 pass
             elif self.able_move == 0:
@@ -197,8 +199,10 @@ class objection:
                 pass
             # 若为己方棋子，且轮到本方下棋则显示选中
             else:
-                image_selected = False  # 是否选中图片的标志
-                self.choice = Pos2load(cur[0], cur[1])
+                self.choice = Pos2load(self.cur[0], self.cur[1])
+                self.choice2 = self.cur #用于保存已经选择的棋子信息
+                self.image_selected =True   # 是否选中图片的标志   
+
 
         # 若处于结束界面
         if self.tag == 30:
@@ -238,6 +242,15 @@ class objection:
                     self.screen.blit(temp_image, Pos2load(j, i))
         if self.choice != (-1, -1):
             self.screen.blit(self.block_image, self.choice)
+
+    #移动棋子到对应位置
+    def move_chess(self):
+        chess=self.chess_info[self.choice2[1]][self.choice2[0]]
+        self.chess_info[self.choice2[1]][self.choice2[0]]=0
+        self.chess_info[self.cur[1]][self.cur[0]]=chess
+        self.able_move = 0
+        self.image_selected = False
+            
 
     # 更新窗口内容
     @staticmethod
