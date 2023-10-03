@@ -48,8 +48,9 @@ def che_check(ChessInfo, cur_grid, cur_chess_num):
             tempPosY = cur_grid[1]
             offSetY = 1
         tempPosY += offSetY
-    
+
     return curCanMove
+
 
 def horse_check(ChessInfo, cur_grid, cur_chess_num):
     curCanMove = []
@@ -59,140 +60,143 @@ def horse_check(ChessInfo, cur_grid, cur_chess_num):
         # 左上;向上两格，向左一格
         if cur_grid[1] >= 1:
             tempChess = ChessInfo[cur_grid[1] - 1][cur_grid[0] - 2]
-            if side != tempChess // 10:
-                curCanMove.append(( cur_grid[0] - 2, cur_grid[1] - 1))
+            if side != tempChess // 10 or tempChess == 0:
+                curCanMove.append((cur_grid[0] - 2, cur_grid[1] - 1))
         # 右上;向上两格，向右一格
         if cur_grid[1] <= 7:
             tempChess = ChessInfo[cur_grid[1] + 1][cur_grid[0] - 2]
-            if side != tempChess // 10:
-                curCanMove.append(( cur_grid[0] - 2, cur_grid[1] + 1))
+            if side != tempChess // 10 or tempChess == 0:
+                curCanMove.append((cur_grid[0] - 2, cur_grid[1] + 1))
     # 向下走
     if cur_grid[0] <= 7 and ChessInfo[cur_grid[0] + 1][cur_grid[1]] == 0:
         if cur_grid[1] >= 1:
             tempChess = ChessInfo[cur_grid[1] - 1][cur_grid[0] + 2]
-            if side != tempChess // 10:
-                curCanMove.append(( cur_grid[0] + 2, cur_grid[1] - 1))
+            if side != tempChess // 10 or tempChess == 0:
+                curCanMove.append((cur_grid[0] + 2, cur_grid[1] - 1))
         if cur_grid[1] <= 7:
             tempChess = ChessInfo[cur_grid[1] + 1][cur_grid[0] + 2]
-            if side != tempChess // 10:
-                curCanMove.append(( cur_grid[0] + 2, cur_grid[1] + 1))
+            if side != tempChess // 10 or tempChess == 0:
+                curCanMove.append((cur_grid[0] + 2, cur_grid[1] + 1))
     # 向左走
     if cur_grid[1] >= 2 and ChessInfo[cur_grid[0]][cur_grid[1] - 1] == 0:
         # 左上；向左两格，向上一格
         if cur_grid[0] >= 1:
             tempChess = ChessInfo[cur_grid[1] - 2][cur_grid[0] - 1]
-            if side != tempChess // 10:
-                curCanMove.append(( cur_grid[0] - 1, cur_grid[1] - 2))
+            if side != tempChess // 10 or tempChess == 0:
+                curCanMove.append((cur_grid[0] - 1, cur_grid[1] - 2))
         # 左下；向左两格，向下一格
         if cur_grid[0] <= 8:
             tempChess = ChessInfo[cur_grid[1] - 2, cur_grid[0] + 1]
-            if side != tempChess // 10:
-                curCanMove.append(( cur_grid[0] + 1, cur_grid[1] - 2))
+            if side != tempChess // 10 or tempChess == 0:
+                curCanMove.append((cur_grid[0] + 1, cur_grid[1] - 2))
     # 向右走
     if cur_grid[1] <= 6 and ChessInfo[cur_grid[0]][cur_grid[1] + 1] == 0:
         if cur_grid[0] >= 1:
             tempChess = ChessInfo[cur_grid[1] + 2][cur_grid[0] - 1]
-            if side != tempChess // 10:
-                curCanMove.append(( cur_grid[0] + 2, cur_grid[1] - 1))
+            if side != tempChess // 10 or tempChess == 0:
+                curCanMove.append((cur_grid[0] + 2, cur_grid[1] - 1))
         if cur_grid[0] <= 8:
             tempChess = ChessInfo[cur_grid[1] + 2][cur_grid[0] + 1]
-            if side != tempChess // 10:
-                curCanMove.append(( cur_grid[0] + 1, cur_grid[1] + 2))
-    
+            if side != tempChess // 10 or tempChess == 0:
+                curCanMove.append((cur_grid[0] + 1, cur_grid[1] + 2))
+
     return curCanMove
+
 
 def xiang_check(ChessInfo, cur_grid, cur_chess_num):
     curCanMove = []
     side = cur_chess_num // 10
-    # 左上(共有限制 and (红相限制 or 黑象限制))
-    if cur_grid[1] != 0 and cur_grid[0] != 0 and cur_grid[0] != 5:
+    # 左上
+    if cur_grid[1] != 0 and cur_grid[0] != 5:
         # 中间没有遮挡
         if ChessInfo[cur_grid[0] - 1][cur_grid[1] - 1] == 0:
             tempChess = ChessInfo[cur_grid[1] - 2][cur_grid[0] - 2]
-            if side != tempChess // 10:
+            if side != tempChess // 10 or tempChess == 0:
                 curCanMove.append((cur_grid[0] - 2, cur_grid[1] - 2))
-    # 右上(共有限制 and (红相限制 or 黑象限制))
-    if cur_grid[1] != 8 and cur_grid[0] != 0 and cur_grid[0] != 5:
+    # 右上
+    if cur_grid[1] != 8 and cur_grid[0] != 5:
         # 中间没有遮挡
         if ChessInfo[cur_grid[0] - 1][cur_grid[1] + 1] == 0:
             tempChess = ChessInfo[cur_grid[1] + 2][cur_grid[0] - 2]
-            if side != tempChess // 10:
+            if side != tempChess // 10 or tempChess == 0:
                 curCanMove.append((cur_grid[0] - 2, cur_grid[1] + 2))
-    # 左下(共有限制 and (红相限制 and 黑象限制))
-    if cur_grid[1] != 0 and cur_grid[0] != 4 and cur_grid[0] != 9:
+    # 左下
+    if cur_grid[1] != 0 and cur_grid[0] != 9:
         # 中间没有遮挡
         if ChessInfo[cur_grid[0] + 1][cur_grid[1] - 1] == 0:
             tempChess = ChessInfo[cur_grid[1] - 2][cur_grid[0] + 2]
-            if side != tempChess // 10:
+            if side != tempChess // 10 or tempChess == 0:
                 curCanMove.append((cur_grid[0] + 2, cur_grid[1] - 2))
-    # 右下(共有限制 and (红相限制 and 黑象限制))
-    if cur_grid[1] != 8 and cur_grid[0] != 4 and cur_grid[0] != 9:
+    # 右下
+    if cur_grid[1] != 8 and cur_grid[0] != 9:
         # 中间没有遮挡
         if ChessInfo[cur_grid[0] + 1][cur_grid[1] + 1] == 0:
             tempChess = ChessInfo[cur_grid[1] + 2][cur_grid[0] + 2]
-            if side != tempChess // 10:
+            if side != tempChess // 10 or tempChess == 0:
                 curCanMove.append((cur_grid[0] + 2, cur_grid[1] + 2))
-    
+
     return curCanMove
+
 
 def shi_check(ChessInfo, cur_grid, cur_chess_num):
     curCanMove = []
     side = cur_chess_num // 10
-    # 左上(共有限制 and (红仕限制 or 黑士限制))
-    if cur_grid[1] != 3 and cur_grid[0] != 0 and cur_grid[0] != 7:
+    # 左上
+    if cur_grid[1] != 3 and cur_grid[0] != 7:
         tempChess = ChessInfo[cur_grid[1] - 1][cur_grid[0] - 1]
-        if side != tempChess // 10:
+        if side != tempChess // 10 or tempChess == 0:
             curCanMove.append((cur_grid[0] - 1, cur_grid[1] - 1))
     # 右上
-    if cur_grid[1] != 5 and cur_grid[0] != 0 and cur_grid[0] != 7:
+    if cur_grid[1] != 5 and cur_grid[0] != 7:
         tempChess = ChessInfo[cur_grid[1] + 1][cur_grid[0] - 1]
-        if side != tempChess // 10:
+        if side != tempChess // 10 or tempChess == 0:
             curCanMove.append((cur_grid[0] - 1, cur_grid[1] + 1))
     # 左下
-    if cur_grid[1] != 3 and cur_grid[0] != 2 and cur_grid[0] != 9:
+    if cur_grid[1] != 3 and cur_grid[0] != 9:
         tempChess = ChessInfo[cur_grid[1] - 1][cur_grid[0] + 1]
-        if side != tempChess // 10:
+        if side != tempChess // 10 or tempChess == 0:
             curCanMove.append((cur_grid[0] + 1, cur_grid[1] - 1))
     # 右下
-    if cur_grid[1] != 5 and cur_grid[0] != 2 and cur_grid[0] != 9:
+    if cur_grid[1] != 5 and cur_grid[0] != 9:
         tempChess = ChessInfo[cur_grid[1] + 1][cur_grid[0] + 1]
-        if side != tempChess // 10:
+        if side != tempChess // 10 or tempChess == 0:
             curCanMove.append((cur_grid[0] + 1, cur_grid[1] + 1))
-    
+
     return curCanMove
+
 
 def shuai_check(ChessInfo, cur_grid, cur_chess_num):
     curCanMove = []
     side = cur_chess_num // 10
     # 上
-    if cur_grid[1] != 0 and cur_grid[0] != 7:
+    if cur_grid[0] != 7:
         tempChess = ChessInfo[cur_grid[1]][cur_grid[0] - 1]
-        if side != tempChess // 10:
+        if side != tempChess // 10 or tempChess == 0:
             curCanMove.append((cur_grid[0] - 1, cur_grid[1]))
     # 下
-    if cur_grid[1] != 2 and cur_grid[0] != 9:
+    if cur_grid[0] != 9:
         tempChess = ChessInfo[cur_grid[1]][cur_grid[0] + 1]
-        if side != tempChess // 10:
+        if side != tempChess // 10 or tempChess == 0:
             curCanMove.append((cur_grid[0] + 1, cur_grid[1]))
     # 左
     if cur_grid[1] != 3:
-        tempChess = ChessInfo[cur_grid[1] -1][cur_grid[0]]
-        if side != tempChess // 10:
+        tempChess = ChessInfo[cur_grid[1] - 1][cur_grid[0]]
+        if side != tempChess // 10 or tempChess == 0:
             curCanMove.append((cur_grid[0], cur_grid[1] - 1))
     # 右
-    if cur_grid[1] != 0 and cur_grid[0] != 7:
+    if cur_grid[1] != 5:
         tempChess = ChessInfo[cur_grid[1] + 1][cur_grid[0]]
-        if side != tempChess // 10:
+        if side != tempChess // 10 or tempChess == 0:
             curCanMove.append((cur_grid[0], cur_grid[1] + 1))
-    # 右
-    
+
     return curCanMove
+
 
 def pao_check(ChessInfo, cur_grid, cur_chess_num):
     curCanMove = []
     side = cur_chess_num // 10
-    
-    #行移动
+
+    # 行移动
     tempPosX = cur_grid[1] - 1
     offSetX = -1  # 向左遍历
     barrier = False
@@ -227,7 +231,7 @@ def pao_check(ChessInfo, cur_grid, cur_chess_num):
 
         tempPosX += offSetX
 
-    #列移动
+    # 列移动
     tempPosY = cur_grid[0] - 1
     offSetY = -1  # 向上遍历
     barrier = False
@@ -262,45 +266,30 @@ def pao_check(ChessInfo, cur_grid, cur_chess_num):
                 barrier = True
 
         tempPosY += offSetY
-    
+
     return curCanMove
+
 
 def bing_check(ChessInfo, cur_grid, cur_chess_num):
     curCanMove = []
     side = cur_chess_num // 10
-    # 红卒
+
     if side == 0:
         if cur_grid[0] != 0:
             tempChess = ChessInfo[cur_grid[1]][cur_grid[0] - 1]
-            if side != tempChess // 10:
+            if side != tempChess // 10 or tempChess == 0:
                 curCanMove.append((cur_grid[0] - 1, cur_grid[1]))  # 拱卒
         # 若已过河
         if cur_grid[0] <= 4:
             if cur_grid[1] != 0:
                 tempChess = ChessInfo[cur_grid[1] - 1][cur_grid[0]]
-                if side != tempChess // 10:
-                    curCanMove.append((cur_grid[0], cur_grid[1] - 1)) # 左走
+                if side != tempChess // 10 or tempChess == 0:
+                    curCanMove.append((cur_grid[0], cur_grid[1] - 1))  # 左走
             if cur_grid[1] != 8:
                 tempChess = ChessInfo[cur_grid[1] + 1][cur_grid[0]]
-                if side != tempChess // 10:
-                    curCanMove.append((cur_grid[0], cur_grid[1] + 1)) # 右走
-    # 黑卒
-    else:
-        if cur_grid[0] != 0:
-            tempChess = ChessInfo[cur_grid[1]][cur_grid[0] + 1]
-            if side != tempChess // 10:
-                curCanMove.append((cur_grid[0] + 1, cur_grid[1]))  # 拱卒
-        # 若已过河
-        if cur_grid[0] >= 5:
-            if cur_grid[1] != 0:
-                tempChess = ChessInfo[cur_grid[1] - 1][cur_grid[0]]
-                if side != tempChess // 10:
-                    curCanMove.append((cur_grid[0], cur_grid[1] - 1)) # 左走
-            if cur_grid[1] != 8:
-                tempChess = ChessInfo[cur_grid[1] + 1][cur_grid[0]]
-                if side != tempChess // 10:
-                    curCanMove.append((cur_grid[0], cur_grid[1] + 1)) # 右走
-    
+                if side != tempChess // 10 or tempChess == 0:
+                    curCanMove.append((cur_grid[0], cur_grid[1] + 1))  # 右走
+
     return curCanMove
 
 
@@ -316,4 +305,5 @@ check_function = {1: che_check,
 # 查找可以该棋子可走的位置
 def where_can_move(chess_info: list[list[int]], choice: tuple):
     cur_chess = chess_info[choice[0]][choice[1]]
-    return check_function.get(cur_chess % 10)(chess_info, choice, cur_chess)
+    temp = check_function.get(cur_chess % 10)(chess_info, choice, cur_chess)
+    return temp

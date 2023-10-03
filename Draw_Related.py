@@ -55,7 +55,7 @@ class objection:
         # 当前选中位置
         self.cur = (-1, -1)
         # 后选中位置
-        self.choice2 = (-1, -1)
+        self.choice_ready = (-1, -1)
         # 行动标志，0 表示不可行动，1 表示可行动
         self.able_move = 0
         # # 选中棋子图片标志
@@ -209,7 +209,7 @@ class objection:
             # 若为己方棋子，且为选中，且轮到本方下棋则显示选中
             else:
                 self.choice = Grid_to_Pos(self.cur[0], self.cur[1])
-                self.choice2 = self.cur  # 用于保存已经选择的棋子信息
+                self.choice_ready = self.cur  # 用于保存已经选择的棋子信息
                 self.image_selected = True  # 是否选中图片的标志
 
         # 若处于结束界面
@@ -258,14 +258,14 @@ class objection:
 
     # 移动棋子到对应位置
     def move_chess(self):
-        # 交换棋子信息矩阵中前后位置的值，实现移动（此处应有判断能否进行的条件，在Chess中实现，再import）
-        curpos = (self.choice2[0], self.choice2[1])
-        nextpos = (self.cur[0], self.cur[1])
-        canmoves = Chess.where_can_move(self.chess_info, curpos)
-        #判断能否走子
-        if nextpos in canmoves:
-            chess = self.chess_info[self.choice2[1]][self.choice2[0]]
-            self.chess_info[self.choice2[1]][self.choice2[0]] = 0
+        # 交换棋子信息矩阵中前后位置的值，实现移动
+        # cur_pos = (self.choice_ready[0], self.choice_ready[1])
+        next_pos = (self.cur[0], self.cur[1])
+        can_moves = Chess.where_can_move(self.chess_info, self.choice_ready)
+        # 判断能否走子
+        if next_pos in can_moves:
+            chess = self.chess_info[self.choice_ready[1]][self.choice_ready[0]]
+            self.chess_info[self.choice_ready[1]][self.choice_ready[0]] = 0
             self.chess_info[self.cur[1]][self.cur[0]] = chess
             # 轮到对方行动
             self.able_move = 0
