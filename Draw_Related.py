@@ -1,6 +1,7 @@
 import pygame
 import sys
 import math
+import Chess
 
 # 棋子及其对应数字标识
 chess_number = {
@@ -54,7 +55,7 @@ class objection:
         # 当前选中位置
         self.cur = (-1, -1)
         # 后选中位置
-        self.choice2 = (-1, -1)
+        self.choice_ready = (-1, -1)
         # 行动标志，0 表示不可行动，1 表示可行动
         self.able_move = 0
         # # 选中棋子图片标志
@@ -196,7 +197,7 @@ class objection:
                     pass
 
             # 若选中对方棋子
-            elif self.side != math.floor(self.chess_info[self.cur[1]][self.cur[0]] / 10):
+            elif self.side != self.chess_info[self.cur[1]][self.cur[0]] // 10:
                 # 若已选中本方棋子，则移动吞并
                 if self.image_selected:
                     self.move_chess()
@@ -208,7 +209,7 @@ class objection:
             # 若为己方棋子，且为选中，且轮到本方下棋则显示选中
             else:
                 self.choice = Grid_to_Pos(self.cur[0], self.cur[1])
-                self.choice2 = self.cur  # 用于保存已经选择的棋子信息
+                self.choice_ready = self.cur  # 用于保存已经选择的棋子信息
                 self.image_selected = True  # 是否选中图片的标志
 
         # 若处于结束界面
@@ -257,15 +258,16 @@ class objection:
 
     # 移动棋子到对应位置
     def move_chess(self):
-        # 交换棋子信息矩阵中前后位置的值，实现移动（此处应有判断能否进行的条件，在Chess中实现，再import）
-        chess = self.chess_info[self.choice2[1]][self.choice2[0]]
-        self.chess_info[self.choice2[1]][self.choice2[0]] = 0
-        self.chess_info[self.cur[1]][self.cur[0]] = chess
-        # 轮到对方行动
-        self.able_move = 0
-        # 走完后，当前无选中位置
-        self.image_selected = False
-        self.choice = (-1, -1)
+        if self.cur in Chess.where_can_move(self.chess_info, self.choice):
+            # 交换棋子信息矩阵中前后位置的值，实现移动
+            chess = self.chess_info[self.choice_ready[1]][self.choice_ready[0]]
+            self.chess_info[self.choice_ready[1]][self.choice_ready[0]] = 0
+            self.chess_info[self.cur[1]][self.cur[0]] = chess
+            # 轮到对方行动
+            self.able_move = 0
+            # 走完后，当前无选中位置
+            self.image_selected = False
+            self.choice = (-1, -1)
 
     # 更新窗口内容
     @staticmethod
