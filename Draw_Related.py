@@ -51,12 +51,18 @@ class objection:
         self.start_OR_join = 0
         # 选中的位置
         self.choice = (-1, -1)
+        # 当前选中位置
+        self.cur = (-1, -1)
+        # 后选中位置
+        self.choice2 = (-1, -1)
         # 行动标志，0 表示不可行动，1 表示可行动
         self.able_move = 0
+        # 选中棋子图片标志
+        self.image_selected = None
 
         # 初始化pygame
         pygame.init()
-        #控制帧率
+        # 控制帧率
         self.clock = pygame.time.Clock()
         # 修改游戏窗口标题
         pygame.display.set_caption('中国象棋')
@@ -96,19 +102,8 @@ class objection:
 
         self.block_image = pygame.image.load('images/四方形标志.png')
 
-        # 棋子初始坐标（红方版）
-        self.chess_info = [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        ]
+        # 棋子初始坐标
+        self.chess_info = None
 
     # 背景绘制，tg即tag
     def bg_draw(self):
@@ -185,10 +180,10 @@ class objection:
             # 判断点击的是哪一个棋子
             self.cur = Co2Pos(mouse_pos[0], mouse_pos[1])
             # 若为空处并且没有选中图片无反应；若为空处并且已经选中则移动图片
-            if self.chess_info[self.cur[1]][self.cur[0]]==0 and self.image_selected == False:               
+            if self.chess_info[self.cur[1]][self.cur[0]] == 0 and self.image_selected is False:
                 print('?')
                 pass
-            elif self.chess_info[self.cur[1]][self.cur[0]]==0 and self.image_selected == True:
+            elif self.chess_info[self.cur[1]][self.cur[0]] == 0 and self.image_selected is True:
                 self.move_chess()
             # 若为对方棋子，或未到本方下棋，则无反应
             elif self.side != math.floor(self.chess_info[self.cur[1]][self.cur[0]] / 10):
@@ -200,9 +195,8 @@ class objection:
             # 若为己方棋子，且轮到本方下棋则显示选中
             else:
                 self.choice = Pos2load(self.cur[0], self.cur[1])
-                self.choice2 = self.cur #用于保存已经选择的棋子信息
-                self.image_selected =True   # 是否选中图片的标志   
-
+                self.choice2 = self.cur  # 用于保存已经选择的棋子信息
+                self.image_selected = True  # 是否选中图片的标志
 
         # 若处于结束界面
         if self.tag == 30:
@@ -232,25 +226,33 @@ class objection:
                 pygame.quit()
                 sys.exit()
 
+    # 绘制棋子
     def draw_chess(self):
+        # 根据棋子信息矩阵绘制每一个棋子
         for i in range(10):
             for j in range(9):
+                # 该位置为空，跳过
                 if self.chess_info[i][j] == 0:
                     continue
+                # 该位置不为空，在chess_number字典中查找该棋子对应图片的文件名，并绘制
                 else:
                     temp_image = pygame.image.load(chess_number.get(self.chess_info[i][j]))
                     self.screen.blit(temp_image, Pos2load(j, i))
+        # 正确选择的位置出现蓝色四方形框
         if self.choice != (-1, -1):
             self.screen.blit(self.block_image, self.choice)
 
-    #移动棋子到对应位置
+    # 移动棋子到对应位置
     def move_chess(self):
-        chess=self.chess_info[self.choice2[1]][self.choice2[0]]
-        self.chess_info[self.choice2[1]][self.choice2[0]]=0
-        self.chess_info[self.cur[1]][self.cur[0]]=chess
+        # 交换棋子信息矩阵中前后位置的值，实现移动（此处应有判断能否进行的条件，在Chesses中实现，再import）
+        chess = self.chess_info[self.choice2[1]][self.choice2[0]]
+        self.chess_info[self.choice2[1]][self.choice2[0]] = 0
+        self.chess_info[self.cur[1]][self.cur[0]] = chess
+        # 轮到对方行动
         self.able_move = 0
+        # 走完后，当前无选中位置
         self.image_selected = False
-            
+        self.choice = (-1, -1)
 
     # 更新窗口内容
     @staticmethod
