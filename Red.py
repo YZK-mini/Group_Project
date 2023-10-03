@@ -48,6 +48,7 @@ class Red_Side(Draw_Related.objection):
         self.side = 0
         # 创建服务器接口
         self.s = socket(AF_INET, SOCK_STREAM)
+        self.conn = socket()
 
         # 定义wait_thread线程
         self.wait_thread = threading.Thread()
@@ -96,10 +97,9 @@ class Red_Side(Draw_Related.objection):
             self.receive_thread.start()
 
     def waiting(self):
-        global conn
         print('Waiting')
         # 等待客户端连接
-        conn, addr = self.s.accept()
+        self.conn, addr = self.s.accept()
         # 连接建立，初始化棋子位置
         self.chess_info = Red_chess_init
         # 红方先行
@@ -118,7 +118,7 @@ class Red_Side(Draw_Related.objection):
         while True:
             # 接收信息存入rcv_data
             if self.s_or_c:
-                rcv_data: list[list[int]] = pickle.loads(conn.recv(buf_size))
+                rcv_data: list[list[int]] = pickle.loads(self.conn.recv(buf_size))
             else:
                 rcv_data: list[list[int]] = pickle.loads(self.c.recv(buf_size))
 
@@ -164,7 +164,7 @@ def main():
 
             # 传输棋子信息矩阵
             if Red.s_or_c:
-                conn.sendall(pickle.dumps(Red.chess_info))
+                Red.conn.sendall(pickle.dumps(Red.chess_info))
             else:
                 Red.c.sendall(pickle.dumps(Red.chess_info))
 
