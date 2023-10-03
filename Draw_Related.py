@@ -23,12 +23,12 @@ chess_number = {
 
 
 # 将网格位置转化为窗口坐标
-def Pos2load(posX, posY):
+def Grid_to_Pos(posX, posY):
     return 57.5 * posX + 2.5, 57.5 * posY + 2.5
 
 
 # 点击坐标转换为棋子位置
-def Co2Pos(coX, coY):
+def Pos_to_Grid(coX, coY):
     x = coX // 57.5
     x = x if x >= 0 else 0
     x = x if x <= 8 else 8
@@ -57,7 +57,7 @@ class objection:
         self.choice2 = (-1, -1)
         # 行动标志，0 表示不可行动，1 表示可行动
         self.able_move = 0
-        # 选中棋子图片标志
+        # # 选中棋子图片标志
         self.image_selected = None
 
         # 初始化pygame
@@ -177,24 +177,37 @@ class objection:
 
         # 若处于游戏界面
         if self.tag == 2:
-            # 判断点击的是哪一个棋子
-            self.cur = Co2Pos(mouse_pos[0], mouse_pos[1])
-            # 若为空处并且没有选中图片无反应；若为空处并且已经选中则移动图片
-            if self.chess_info[self.cur[1]][self.cur[0]] == 0 and self.image_selected is False:
-                print('?')
-                pass
-            elif self.chess_info[self.cur[1]][self.cur[0]] == 0 and self.image_selected is True:
-                self.move_chess()
-            # 若为对方棋子，或未到本方下棋，则无反应
-            elif self.side != math.floor(self.chess_info[self.cur[1]][self.cur[0]] / 10):
-                print('no')
-                pass
-            elif self.able_move == 0:
+            # 判断点击的是哪一个格子
+            self.cur = Pos_to_Grid(mouse_pos[0], mouse_pos[1])
+
+            # 若未轮到本方
+            if self.able_move == 0:
                 print('wait')
                 pass
-            # 若为己方棋子，且轮到本方下棋则显示选中
+
+            # 若为空处
+            elif self.chess_info[self.cur[1]][self.cur[0]] == 0:
+                # 若已选中本方棋子，则移动
+                if self.image_selected:
+                    self.move_chess()
+                # 若没有选中图片，则无反应
+                else:
+                    print('?')
+                    pass
+
+            # 若选中对方棋子
+            elif self.side != math.floor(self.chess_info[self.cur[1]][self.cur[0]] / 10):
+                # 若已选中本方棋子，则移动吞并
+                if self.image_selected:
+                    self.move_chess()
+                # 若之前未选中本方棋子，则无反应
+                else:
+                    print('no')
+                    pass
+
+            # 若为己方棋子，且为选中，且轮到本方下棋则显示选中
             else:
-                self.choice = Pos2load(self.cur[0], self.cur[1])
+                self.choice = Grid_to_Pos(self.cur[0], self.cur[1])
                 self.choice2 = self.cur  # 用于保存已经选择的棋子信息
                 self.image_selected = True  # 是否选中图片的标志
 
@@ -237,7 +250,7 @@ class objection:
                 # 该位置不为空，在chess_number字典中查找该棋子对应图片的文件名，并绘制
                 else:
                     temp_image = pygame.image.load(chess_number.get(self.chess_info[i][j]))
-                    self.screen.blit(temp_image, Pos2load(j, i))
+                    self.screen.blit(temp_image, Grid_to_Pos(j, i))
         # 正确选择的位置出现蓝色四方形框
         if self.choice != (-1, -1):
             self.screen.blit(self.block_image, self.choice)
