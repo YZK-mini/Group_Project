@@ -48,6 +48,7 @@ class Black_Side(Draw_Related.objection):
         self.side = 1
         # 创建服务器接口
         self.s = socket(AF_INET, SOCK_STREAM)
+        self.conn = socket()
 
         # 定义wait_thread线程
         self.wait_thread = threading.Thread()
@@ -96,10 +97,9 @@ class Black_Side(Draw_Related.objection):
             self.receive_thread.start()
 
     def waiting(self):
-        global conn
         print('Waiting')
         # 等待客户端连接
-        conn, addr = self.s.accept()
+        self.conn, addr = self.s.accept()
         # 连接建立，初始化棋子位置
         self.chess_info = Black_chess_init
         # 黑方后行
@@ -118,7 +118,7 @@ class Black_Side(Draw_Related.objection):
         while True:
             # 接收信息存入rcv_data
             if self.s_or_c:
-                rcv_data: list[list[int]] = pickle.loads(conn.recv(buf_size))
+                rcv_data: list[list[int]] = pickle.loads(self.conn.recv(buf_size))
             else:
                 rcv_data: list[list[int]] = pickle.loads(self.c.recv(buf_size))
             # 换方需对矩阵进行180度旋转
@@ -163,7 +163,7 @@ def main():
 
             # 传输棋子信息矩阵
             if Black.s_or_c:
-                conn.sendall(pickle.dumps(Black.chess_info))
+                Black.conn.sendall(pickle.dumps(Black.chess_info))
             else:
                 Black.c.sendall(pickle.dumps(Black.chess_info))
 
