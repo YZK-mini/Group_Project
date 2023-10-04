@@ -116,11 +116,17 @@ class Red_Side(Draw_Related.objection):
         while True:
             # 接收信息存入rcv_data
             if self.s_or_c:
-                msg_s = pickle.loads(self.conn.recv(buf_size))
-                self.solve_rcv(msg_s)
+                try:
+                    msg_s = pickle.loads(self.conn.recv(buf_size))
+                    self.solve_rcv(msg_s)
+                except pickle.UnpicklingError:
+                    pass
             else:
-                msg_c = pickle.loads(self.c.recv(buf_size))
-                self.solve_rcv(msg_c)
+                try:
+                    msg_c = pickle.loads(self.c.recv(buf_size))
+                    self.solve_rcv(msg_c)
+                except pickle.UnpicklingError:
+                    pass
 
 
 def main():
