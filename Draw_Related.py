@@ -241,6 +241,7 @@ class objection:
                     self.red_exit1[1] < mouse_pos[1] < self.red_exit2[1]):
                 pygame.quit()
                 sys.exit()
+
         if self.tag == 31:
             # 判断是否点击’返回开始界面‘按钮
             if (self.black_return1[0] < mouse_pos[0] < self.black_return2[0]) and (
@@ -294,8 +295,10 @@ class objection:
         if next_pos in self.can_moves:
             # 判断是否将或帅被吃
             if self.chess_info[next_pos[0]][next_pos[1]] == 5:
+                print('帅已死')
                 self.tag = 31
             if self.chess_info[next_pos[0]][next_pos[1]] == 15:
+                print('将已死')
                 self.tag = 30
             # 若想要移动的位置在可以移动的位置列表内，则执行吃子或移动
             chess = self.chess_info[self.choice_ready[0]][self.choice_ready[1]]
