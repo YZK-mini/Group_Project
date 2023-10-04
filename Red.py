@@ -27,17 +27,13 @@ Red_chess_init = [
 # 用于传送数据的类
 class Mess:
     def __init__(self):
-        self.beforeX = 0
-        self.beforeY = 0
-        self.afterX = 0
-        self.afterY = 0
+        self.tg = 1
+        self.chess_text = [[]]
 
     # 创建数据传输的类，需要本方的移动信息
-    def create_Mess(self, Pox, PoY, CuX, CuY):
-        self.beforeX = Pox
-        self.beforeY = PoY
-        self.afterX = CuX
-        self.afterY = CuY
+    def create_Mess(self, Tag, Chess_info):
+        self.tg = Tag
+        self.chess_text = Chess_info
 
 
 # 红方类
@@ -118,9 +114,17 @@ class Red_Side(Draw_Related.objection):
         while True:
             # 接收信息存入rcv_data
             if self.s_or_c:
-                rcv_data: list[list[int]] = pickle.loads(self.conn.recv(buf_size))
+                msg_s = pickle.loads(self.conn.recv(buf_size))
+
+                if msg_s.tg:
+                    self.tag = 31
+                rcv_data = msg_s.chess_text
             else:
-                rcv_data: list[list[int]] = pickle.loads(self.c.recv(buf_size))
+                msg_c = pickle.loads(self.c.recv(buf_size))
+
+                if msg_c.tg:
+                    self.tag = 31
+                rcv_data = msg_c.chess_text
 
             # 换方需对矩阵进行180度旋转
             for i in range(5):
@@ -162,14 +166,25 @@ def main():
         # 背景绘制
         Red.bg_draw()
 
-        # 若为游戏界面
-        if Red.tag == 2:
-
+        # 创建传输信息
+        msg = Mess()
+        if ps_tag == 2 and Red.tag == 30:
+            msg.create_Mess(1, Red.chess_info)
             # 传输棋子信息矩阵
             if Red.s_or_c:
-                Red.conn.sendall(pickle.dumps(Red.chess_info))
+                Red.conn.sendall(pickle.dumps(msg))
             else:
-                Red.c.sendall(pickle.dumps(Red.chess_info))
+                Red.c.sendall(pickle.dumps(msg))
+        elif Red.tag == 2:
+            msg.create_Mess(0, Red.chess_info)
+
+        # 若为游戏界面
+        if Red.tag == 2:
+            # 传输棋子信息矩阵
+            if Red.s_or_c:
+                Red.conn.sendall(pickle.dumps(msg))
+            else:
+                Red.c.sendall(pickle.dumps(msg))
 
             # 绘制棋子
             Red.draw_chess()
