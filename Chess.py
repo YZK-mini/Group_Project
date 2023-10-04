@@ -318,6 +318,5 @@ check_function = {1: che_check,
 # 查找可以该棋子可走的位置
 def where_can_move(chess_info: list[list[int]], choice: tuple):
     cur_chess = chess_info[choice[0]][choice[1]]
-    print(f'当前选择棋子:{choice}')
     temp = check_function.get(cur_chess % 10)(chess_info, choice, cur_chess)
     return temp

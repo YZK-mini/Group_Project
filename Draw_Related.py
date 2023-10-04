@@ -50,7 +50,7 @@ class objection:
 
         # 红方或黑方标志，0表示红方，1表示黑方
         self.side = 0
-        # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，30、31表示结束界面
+        # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，3表示结束界面
         self.tag = 0
         # 开始界面按钮标识，0表示未选，1表示选择‘启动游戏’，2表示选择‘加入游戏’
         self.start_OR_join = 0
@@ -110,6 +110,12 @@ class objection:
 
         # 选中棋子显示的标志
         self.block_image = pygame.image.load('images/四方形标志.png')
+
+        # 走棋提示
+        self.tip_image = pygame.image.load('images/提示.png')
+
+        # 当前选中棋子可移动位置
+        self.can_moves = []
 
         # 棋子初始坐标
         self.chess_info = None
@@ -265,19 +271,27 @@ class objection:
         if self.choice != (-1, -1):
             self.screen.blit(self.block_image, self.choice)
 
+        if self.image_selected:
+            # 已选中的棋子位置
+            cur_pos = (self.choice_ready[0], self.choice_ready[1])
+            # 可以移动的位置列表
+            self.can_moves = Chess.where_can_move(self.chess_info, cur_pos)
+            # 绘制移动提示
+            for grid in self.can_moves:
+                position = Grid_to_Pos(grid[0], grid[1])
+                self.screen.blit(self.tip_image, (position[0] + 17.5, position[1] + 17.5))
+
     # 移动棋子到对应位置
     def move_chess(self):
-        # 交换棋子信息矩阵中前后位置的值，实现移动
-        # 已选中的棋子位置
-        cur_pos = (self.choice_ready[0], self.choice_ready[1])
+
         # 想要移动的位置
         next_pos = (self.cur[0], self.cur[1])
-        # 可以移动的位置列表
-        can_moves = Chess.where_can_move(self.chess_info, cur_pos)
-        print(f'可以移动的位置:{can_moves}')
+
+        print(f'可以移动的位置:{self.can_moves}')
         print(f'选择移动的位置:{self.cur}')
+
         # 判断能否走子
-        if next_pos in can_moves:
+        if next_pos in self.can_moves:
             # 判断是否将或帅被吃
             if self.chess_info[next_pos[0]][next_pos[1]] == 5:
                 self.tag = 31
