@@ -1,6 +1,7 @@
+import math
+
 import pygame
 import sys
-import math
 import Chess
 
 # 棋子及其对应数字标识
@@ -25,7 +26,7 @@ chess_number = {
 
 # 将网格位置转化为窗口坐标
 def Grid_to_Pos(posX, posY):
-    return 57.5 * posX + 2.5, 57.5 * posY + 2.5
+    return 57.5 * posY + 2.5, 57.5 * posX + 2.5
 
 
 # 点击坐标转换为棋子位置
@@ -38,7 +39,7 @@ def Pos_to_Grid(coX, coY):
     y = y if y >= 0 else 0
     y = y if y <= 9 else 9
     y = math.floor(y)
-    return x, y
+    return y, x
 
 
 class objection:
@@ -183,30 +184,30 @@ class objection:
 
             # 若未轮到本方
             if self.able_move == 0:
-                print('wait')
+                print('请等待对方下棋')
                 pass
 
             # 若为空处
-            elif self.chess_info[self.cur[1]][self.cur[0]] == 0:
+            elif self.chess_info[self.cur[0]][self.cur[1]] == 0:
                 # 若已选中本方棋子，则移动
                 if self.image_selected:
                     self.move_chess()
                 # 若没有选中图片，则无反应
                 else:
-                    print('?')
+                    print('空白处')
                     pass
 
             # 若选中对方棋子
-            elif self.side != math.floor(self.chess_info[self.cur[1]][self.cur[0]] / 10):
+            elif self.side != self.chess_info[self.cur[0]][self.cur[1]] // 10:
                 # 若已选中本方棋子，则移动吞并
                 if self.image_selected:
                     self.move_chess()
                 # 若之前未选中本方棋子，则无反应
                 else:
-                    print('no')
+                    print('不是你的棋子')
                     pass
 
-            # 若为己方棋子，且为选中，且轮到本方下棋则显示选中
+            # 若为己方棋子，且未选中，且轮到本方下棋则显示选中
             else:
                 self.choice = Grid_to_Pos(self.cur[0], self.cur[1])
                 self.choice_ready = self.cur  # 用于保存已经选择的棋子信息
@@ -251,7 +252,7 @@ class objection:
                 # 该位置不为空，在chess_number字典中查找该棋子对应图片的文件名，并绘制
                 else:
                     temp_image = pygame.image.load(chess_number.get(self.chess_info[i][j]))
-                    self.screen.blit(temp_image, Grid_to_Pos(j, i))
+                    self.screen.blit(temp_image, Grid_to_Pos(i, j))
         # 正确选择的位置出现蓝色四方形框
         if self.choice != (-1, -1):
             self.screen.blit(self.block_image, self.choice)
@@ -259,21 +260,24 @@ class objection:
     # 移动棋子到对应位置
     def move_chess(self):
         # 交换棋子信息矩阵中前后位置的值，实现移动
-        # cur_pos = (self.choice_ready[0], self.choice_ready[1])
+        cur_pos = (self.choice_ready[0], self.choice_ready[1])
         next_pos = (self.cur[0], self.cur[1])
-        can_moves = Chess.where_can_move(self.chess_info, self.choice_ready)
+        can_moves = Chess.where_can_move(self.chess_info, cur_pos)
+        print(f'可以移动的位置:{can_moves}')
+        print(f'选择移动的位置:{self.cur}')
         # 判断能否走子
         if next_pos in can_moves:
-            chess = self.chess_info[self.choice_ready[1]][self.choice_ready[0]]
-            self.chess_info[self.choice_ready[1]][self.choice_ready[0]] = 0
-            self.chess_info[self.cur[1]][self.cur[0]] = chess
-            # 轮到对方行动
-            self.able_move = 0
+            chess = self.chess_info[self.choice_ready[0]][self.choice_ready[1]]
+            self.chess_info[self.choice_ready[0]][self.choice_ready[1]] = 0
+            self.chess_info[self.cur[0]][self.cur[1]] = chess
+
             # 走完后，当前无选中位置
             self.image_selected = False
             self.choice = (-1, -1)
+            # 轮到对方行动
+            self.able_move = 0
         else:
-            print('no')
+            print('不能移动到此处')
             pass
 
     # 更新窗口内容

@@ -24,22 +24,6 @@ Red_chess_init = [
 ]
 
 
-# 用于传送数据的类
-class Mess:
-    def __init__(self):
-        self.beforeX = 0
-        self.beforeY = 0
-        self.afterX = 0
-        self.afterY = 0
-
-    # 创建数据传输的类，需要本方的移动信息
-    def create_Mess(self, Pox, PoY, CuX, CuY):
-        self.beforeX = Pox
-        self.beforeY = PoY
-        self.afterX = CuX
-        self.afterY = CuY
-
-
 # 红方类
 class Red_Side(Draw_Related.objection):
     def __init__(self):
@@ -90,14 +74,14 @@ class Red_Side(Draw_Related.objection):
             except ConnectionRefusedError:
                 print('连接失败')
                 self.tag = 0
-            print('Start')
+            print('连接成功，开始游戏')
             # 绑定receive_thread线程与receiver函数
             self.receive_thread = threading.Thread(target=self.receiver)
             # 启动receive线程
             self.receive_thread.start()
 
     def waiting(self):
-        print('Waiting')
+        print('等待对方连接...')
         # 等待客户端连接
         self.conn, addr = self.s.accept()
         # 连接建立，初始化棋子位置
@@ -107,7 +91,7 @@ class Red_Side(Draw_Related.objection):
         # 连接建立，进入游戏界面
         self.tag = 2
 
-        print('Start')
+        print('连接成功，开始游戏')
         # 绑定receive_thread线程与receiver函数
         self.receive_thread = threading.Thread(target=self.receiver)
         # 启动receive线程
