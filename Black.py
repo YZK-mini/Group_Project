@@ -140,7 +140,10 @@ def main():
     # 主循环
     while True:
 
+        # 每次事件检测前的tag
         ps_tag = Black.tag
+
+        # 窗口刷新率设为60
         Black.clock.tick(60)
 
         # 操作信息检测
