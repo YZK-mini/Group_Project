@@ -50,7 +50,7 @@ class objection:
 
         # 红方或黑方标志，0表示红方，1表示黑方
         self.side = 0
-        # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，3表示结束界面
+        # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，30、31表示结束界面
         self.tag = 0
         # 开始界面按钮标识，0表示未选，1表示选择‘启动游戏’，2表示选择‘加入游戏’
         self.start_OR_join = 0
@@ -278,6 +278,10 @@ class objection:
         print(f'选择移动的位置:{self.cur}')
         # 判断能否走子
         if next_pos in can_moves:
+            if self.chess_info[next_pos[0]][next_pos[1]] == 5:
+                self.tag = 31
+            if self.chess_info[next_pos[0]][next_pos[1]] == 15:
+                self.tag = 30
             # 若想要移动的位置在可以移动的位置列表内，则执行吃子或移动
             chess = self.chess_info[self.choice_ready[0]][self.choice_ready[1]]
             self.chess_info[self.choice_ready[0]][self.choice_ready[1]] = 0
