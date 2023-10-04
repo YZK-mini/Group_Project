@@ -4,9 +4,9 @@ import threading
 import pickle
 
 # 当红方发起游戏的ip地址
-ip_red_server = ('127.0.0.1', 8000)
+ip_red_server = ('127.0.0.1', 8000)  # 若联机，更改此处为本机ip及端口
 # 当红方参加游戏需要连接的ip地址
-ip_red_client = ('127.0.0.1', 5000)
+ip_red_client = ('127.0.0.1', 5000)  # 若联机，更改此处为对方主机ip及端口
 # 传输的尺寸限制
 buf_size = 512
 # 红方初始棋子位置
