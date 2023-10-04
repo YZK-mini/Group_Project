@@ -1,5 +1,4 @@
 import math
-
 import pygame
 import sys
 import Chess
@@ -26,31 +25,36 @@ chess_number = {
 
 # 将网格位置转化为窗口坐标
 def Grid_to_Pos(posX, posY):
+    # 每个格子距离57.5，为了实际显示效果作了2.5的偏移
     return 57.5 * posY + 2.5, 57.5 * posX + 2.5
 
 
-# 点击坐标转换为棋子位置
+# 点击坐标转换为网格位置
 def Pos_to_Grid(coX, coY):
     x = coX // 57.5
     x = x if x >= 0 else 0
     x = x if x <= 8 else 8
     x = math.floor(x)
+
     y = coY // 57.5
     y = y if y >= 0 else 0
     y = y if y <= 9 else 9
     y = math.floor(y)
+
     return y, x
 
 
 class objection:
     # 初始化函数，供black和red调用
     def __init__(self):
+
         # 红方或黑方标志，0表示红方，1表示黑方
         self.side = 0
         # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，3表示结束界面
         self.tag = 0
         # 开始界面按钮标识，0表示未选，1表示选择‘启动游戏’，2表示选择‘加入游戏’
         self.start_OR_join = 0
+
         # 选中的位置
         self.choice = (-1, -1)
         # 当前选中位置
@@ -59,7 +63,7 @@ class objection:
         self.choice_ready = (-1, -1)
         # 行动标志，0 表示不可行动，1 表示可行动
         self.able_move = 0
-        # # 选中棋子图片标志
+        # 选中棋子图片标志
         self.image_selected = None
 
         # 初始化pygame
@@ -87,9 +91,11 @@ class objection:
         self.return_button2 = (340, 379)
         # 按钮'返回'左上（165，313）右下（340，379）
 
+        # 棋盘界面图片
         self.board_img = pygame.image.load('images/棋盘.png')
 
-        self.end_img = 0
+        # 结束界面图片
+        self.end_img = None
 
         self.red_return1 = (115, 299)
         self.red_return2 = (394, 378)
@@ -102,12 +108,13 @@ class objection:
         self.black_exit2 = (318, 483)
         # 黑方胜界面中，按钮’返回开始菜单‘左上（114，289）右下（377，366），按钮'退出'左上(183，419)右下（318，483）
 
+        # 选中棋子显示的标志
         self.block_image = pygame.image.load('images/四方形标志.png')
 
         # 棋子初始坐标
         self.chess_info = None
 
-    # 背景绘制，tg即tag
+    # 背景绘制
     def bg_draw(self):
         # 背景绘制
         if self.tag == 0:
@@ -209,6 +216,7 @@ class objection:
 
             # 若为己方棋子，且未选中，且轮到本方下棋则显示选中
             else:
+
                 self.choice = Grid_to_Pos(self.cur[0], self.cur[1])
                 self.choice_ready = self.cur  # 用于保存已经选择的棋子信息
                 self.image_selected = True  # 是否选中图片的标志
@@ -260,13 +268,17 @@ class objection:
     # 移动棋子到对应位置
     def move_chess(self):
         # 交换棋子信息矩阵中前后位置的值，实现移动
+        # 已选中的棋子位置
         cur_pos = (self.choice_ready[0], self.choice_ready[1])
+        # 想要移动的位置
         next_pos = (self.cur[0], self.cur[1])
+        # 可以移动的位置列表
         can_moves = Chess.where_can_move(self.chess_info, cur_pos)
         print(f'可以移动的位置:{can_moves}')
         print(f'选择移动的位置:{self.cur}')
         # 判断能否走子
         if next_pos in can_moves:
+            # 若想要移动的位置在可以移动的位置列表内，则执行吃子或移动
             chess = self.chess_info[self.choice_ready[0]][self.choice_ready[1]]
             self.chess_info[self.choice_ready[0]][self.choice_ready[1]] = 0
             self.chess_info[self.cur[0]][self.cur[1]] = chess
@@ -276,7 +288,9 @@ class objection:
             self.choice = (-1, -1)
             # 轮到对方行动
             self.able_move = 0
+
         else:
+            # 想要移动的位置不在可以移动的位置列表内，则无反应
             print('不能移动到此处')
             pass
 
