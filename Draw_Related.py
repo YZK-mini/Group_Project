@@ -45,9 +45,8 @@ def Pos_to_Grid(coX, coY):
 
 
 class objection:
-    # 初始化函数，供black和red调用
+    # 初始化函数
     def __init__(self):
-
         # 红方或黑方标志，0表示红方，1表示黑方
         self.side = 0
         # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，3表示结束界面
@@ -229,11 +228,11 @@ class objection:
 
         # 若处于结束界面
         if self.tag == 30:
-            # 判断是否点击’返回开始界面‘按钮
+            # 判断是否点击’再来一局‘按钮
             if (self.red_return1[0] < mouse_pos[0] < self.red_return2[0]) and (
                     self.red_return1[1] < mouse_pos[1] < self.red_return2[1]):
                 # 修改标识符
-                self.tag = 0
+                self.tag = 2
                 self.start_OR_join = 0
                 return
             # 判断是否点击'退出'按钮
@@ -247,7 +246,7 @@ class objection:
             if (self.black_return1[0] < mouse_pos[0] < self.black_return2[0]) and (
                     self.black_return1[1] < mouse_pos[1] < self.black_return2[1]):
                 # 修改标识符
-                self.tag = 0
+                self.tag = 2
                 self.start_OR_join = 0
                 return
             # 判断是否点击'退出'按钮
@@ -255,6 +254,22 @@ class objection:
                     self.black_exit1[1] < mouse_pos[1] < self.black_exit2[1]):
                 pygame.quit()
                 sys.exit()
+
+    def solve_rcv(self, msg):
+        if msg.tg == 1:
+            self.tag = 30
+        rcv_data = msg.chess_text
+        # 换方需对矩阵进行180度旋转
+        for i in range(5):
+            for j in range(9):
+                temp = rcv_data[i][j]
+                rcv_data[i][j] = rcv_data[9 - i][8 - j]
+                rcv_data[9 - i][8 - j] = temp
+        # 如果接收到的棋盘与已有棋盘不同，则更新棋盘
+        if self.chess_info != rcv_data:
+            self.chess_info = rcv_data
+            # 轮到己方行动
+            self.able_move = 1
 
     # 绘制棋子
     def draw_chess(self):

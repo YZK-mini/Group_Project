@@ -40,6 +40,7 @@ class Mess:
 class Black_Side(Draw_Related.objection):
     def __init__(self):
         super(Black_Side, self).__init__()
+
         # 表明自己为黑方
         self.side = 1
         # 创建服务器接口
@@ -115,26 +116,10 @@ class Black_Side(Draw_Related.objection):
             # 接收信息存入rcv_data
             if self.s_or_c:
                 msg_s = pickle.loads(self.conn.recv(buf_size))
-
-                if msg_s.tg:
-                    self.tag = 30
-                rcv_data = msg_s.chess_text
+                self.solve_rcv(msg_s)
             else:
                 msg_c = pickle.loads(self.c.recv(buf_size))
-                if msg_c.tg:
-                    self.tag = 30
-                rcv_data = msg_c.chess_text
-
-            # 换方需对矩阵进行180度旋转
-            for i in range(5):
-                for j in range(9):
-                    temp = rcv_data[i][j]
-                    rcv_data[i][j] = rcv_data[9 - i][8 - j]
-                    rcv_data[9 - i][8 - j] = temp
-            if self.chess_info != rcv_data:
-                self.chess_info = rcv_data
-                # 轮到己方行动
-                self.able_move = 1
+                self.solve_rcv(msg_c)
 
 
 def main():
@@ -167,19 +152,29 @@ def main():
 
         # 创建传输信息
         msg = Mess()
+        # 游戏结束瞬间
         if ps_tag == 2 and Black.tag == 31:
-            msg.create_Mess(1, Black.chess_info)
+            msg.create_Mess(1, Black_chess_init)
             # 传输棋子信息矩阵
             if Black.s_or_c:
                 Black.conn.sendall(pickle.dumps(msg))
             else:
                 Black.c.sendall(pickle.dumps(msg))
-        elif Black.tag == 2:
+        # 游戏重启
+        elif (ps_tag == 30 or ps_tag == 31) and Black.tag == 2:
+            msg.create_Mess(0, Black_chess_init)
+            # 传输棋子信息矩阵
+            if Black.s_or_c:
+                Black.conn.sendall(pickle.dumps(msg))
+            else:
+                Black.c.sendall(pickle.dumps(msg))
+            Black.able_move = 0
+        # 游戏其他时间
+        else:
             msg.create_Mess(0, Black.chess_info)
 
         # 若为游戏界面
         if Black.tag == 2:
-
             # 传输棋子信息矩阵
             if Black.s_or_c:
                 Black.conn.sendall(pickle.dumps(msg))

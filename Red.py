@@ -40,6 +40,7 @@ class Mess:
 class Red_Side(Draw_Related.objection):
     def __init__(self):
         super(Red_Side, self).__init__()
+
         # 表明自己为红方
         self.side = 0
         # 创建服务器接口
@@ -65,6 +66,7 @@ class Red_Side(Draw_Related.objection):
             self.s_or_c = 1
             # 绑定服务器接口
             self.s.bind(ip_red_server)
+
             # 服务器进入监听模式
             self.s.listen(1)
             # 绑定wait_thread线程和waiting函数
@@ -115,27 +117,10 @@ class Red_Side(Draw_Related.objection):
             # 接收信息存入rcv_data
             if self.s_or_c:
                 msg_s = pickle.loads(self.conn.recv(buf_size))
-
-                if msg_s.tg:
-                    self.tag = 31
-                rcv_data = msg_s.chess_text
+                self.solve_rcv(msg_s)
             else:
                 msg_c = pickle.loads(self.c.recv(buf_size))
-
-                if msg_c.tg:
-                    self.tag = 31
-                rcv_data = msg_c.chess_text
-
-            # 换方需对矩阵进行180度旋转
-            for i in range(5):
-                for j in range(9):
-                    temp = rcv_data[i][j]
-                    rcv_data[i][j] = rcv_data[9 - i][8 - j]
-                    rcv_data[9 - i][8 - j] = temp
-            if self.chess_info != rcv_data:
-                self.chess_info = rcv_data
-                # 轮到己方行动
-                self.able_move = 1
+                self.solve_rcv(msg_c)
 
 
 def main():
@@ -168,14 +153,25 @@ def main():
 
         # 创建传输信息
         msg = Mess()
+        # 游戏结束瞬间
         if ps_tag == 2 and Red.tag == 30:
-            msg.create_Mess(1, Red.chess_info)
+            msg.create_Mess(1, Red_chess_init)
             # 传输棋子信息矩阵
             if Red.s_or_c:
                 Red.conn.sendall(pickle.dumps(msg))
             else:
                 Red.c.sendall(pickle.dumps(msg))
-        elif Red.tag == 2:
+        # 游戏重启
+        elif (ps_tag == 30 or ps_tag == 31) and Red.tag == 2:
+            msg.create_Mess(0, Red_chess_init)
+            # 传输棋子信息矩阵
+            if Red.s_or_c:
+                Red.conn.sendall(pickle.dumps(msg))
+            else:
+                Red.c.sendall(pickle.dumps(msg))
+            Red.able_move = 1
+        # 游戏其他时间
+        else:
             msg.create_Mess(0, Red.chess_info)
 
         # 若为游戏界面
