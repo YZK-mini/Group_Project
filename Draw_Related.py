@@ -278,6 +278,11 @@ class objection:
         print(f'选择移动的位置:{self.cur}')
         # 判断能否走子
         if next_pos in can_moves:
+            # 判断是否将或帅被吃
+            if self.chess_info[next_pos[0]][next_pos[1]] == 5:
+                self.tag = 31
+            if self.chess_info[next_pos[0]][next_pos[1]] == 15:
+                self.tag = 30
             # 若想要移动的位置在可以移动的位置列表内，则执行吃子或移动
             chess = self.chess_info[self.choice_ready[0]][self.choice_ready[1]]
             self.chess_info[self.choice_ready[0]][self.choice_ready[1]] = 0
