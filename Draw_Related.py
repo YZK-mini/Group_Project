@@ -75,7 +75,7 @@ class DrawType:
         icon = pygame.image.load("images/图标.png")
         pygame.display.set_icon(icon)
         # 创建窗口
-        self.screen = pygame.display.set_mode((521, 577))
+        self.screen = pygame.display.set_mode((521, 640))
 
         # 背景图片
         self.start_img = pygame.image.load('images/开始界面.png')
@@ -92,6 +92,13 @@ class DrawType:
 
         # 棋盘界面图片
         self.board_img = pygame.image.load('images/棋盘.png')
+
+        self.surrender_button1 = (385, 586)
+        self.surrender_button2 = (510, 633)
+        # 按钮‘认输’左上(385，586)，右下(510,633)
+        self.tie_button1 = (243, 586)
+        self.tie_button2 = (370, 633)
+        # 按钮‘和棋’左上（243，586），右下（370，633）
 
         # 结束界面图片
         self.end_img = None
@@ -118,6 +125,15 @@ class DrawType:
 
         # 棋子初始坐标
         self.chess_info = None
+
+        # 求和标识
+        self.tie = 0
+        # 和棋提示
+        self.surrender_image = pygame.image.load('images/求和提示.png')
+        self.surrender_pos = (18, 590)
+
+        # 认输标识
+        self.surrender = 0
 
     # 背景绘制
     def bg_draw(self):
@@ -194,6 +210,16 @@ class DrawType:
             # 判断点击的是哪一个格子
             self.cur = pos_to_grid(mouse_pos[0], mouse_pos[1])
 
+            # 若点击'和棋'按钮
+            if (self.tie_button1[0] < mouse_pos[0] < self.tie_button2[0]) and (
+                    self.tie_button1[1] < mouse_pos[1] < self.tie_button2[1]):
+                self.tie = 1
+
+            # 若点击'认输'按钮
+            if (self.surrender_button1[0] < mouse_pos[0] < self.surrender_button2[0]) and (
+                    self.surrender_button1[1] < mouse_pos[1] < self.surrender_button2[1]):
+                self.surrender = 1
+
             # 若未轮到本方
             if self.able_move == 0:
                 print('请等待对方下棋')
@@ -252,26 +278,6 @@ class DrawType:
                     self.black_exit1[1] < mouse_pos[1] < self.black_exit2[1]):
                 pygame.quit()
                 sys.exit()
-
-    def solve_rcv(self, msg):
-        # 当接受到游戏结束信息，该信息是胜方发给败方的，因此结合本方颜色判断结束界面
-        if msg.tg == 1 and self.side == 1:
-            self.tag = 30
-        elif msg.tg == 1 and self.side == 0:
-            self.tag = 31
-
-        rcv_data = msg.chess_text
-        # 换方需对矩阵进行180度旋转
-        for i in range(5):
-            for j in range(9):
-                temp = rcv_data[i][j]
-                rcv_data[i][j] = rcv_data[9 - i][8 - j]
-                rcv_data[9 - i][8 - j] = temp
-        # 如果接收到的棋盘与已有棋盘不同，则更新棋盘
-        if self.chess_info != rcv_data:
-            self.chess_info = rcv_data
-            # 轮到己方行动
-            self.able_move = 1
 
     # 绘制棋子
     def draw_chess(self):

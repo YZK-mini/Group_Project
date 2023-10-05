@@ -155,14 +155,14 @@ def shi_check(chess_info, cur_grid, cur_chess_num):
             cur_can_move.append((cur_grid[0] - 1, cur_grid[1] - 1))
     # 右上
     if cur_grid[1] != 5 and cur_grid[0] != 7:
-        temp_chess = chess_info[cur_grid[0] + 1][cur_grid[1] - 1]
-        if side != temp_chess // 10 or temp_chess == 0:
-            cur_can_move.append((cur_grid[0] + 1, cur_grid[1] - 1))
-    # 左下
-    if cur_grid[1] != 3 and cur_grid[0] != 9:
         temp_chess = chess_info[cur_grid[0] - 1][cur_grid[1] + 1]
         if side != temp_chess // 10 or temp_chess == 0:
             cur_can_move.append((cur_grid[0] - 1, cur_grid[1] + 1))
+    # 左下
+    if cur_grid[1] != 3 and cur_grid[0] != 9:
+        temp_chess = chess_info[cur_grid[0] + 1][cur_grid[1] - 1]
+        if side != temp_chess // 10 or temp_chess == 0:
+            cur_can_move.append((cur_grid[0] + 1, cur_grid[1] - 1))
     # 右下
     if cur_grid[1] != 5 and cur_grid[0] != 9:
         temp_chess = chess_info[cur_grid[0] + 1][cur_grid[1] + 1]

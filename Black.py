@@ -134,6 +134,33 @@ class BlackSide(Draw_Related.DrawType):
         else:
             self.c.sendall(pickle.dumps(msg))
 
+    def solve_rcv(self, msg):
+        # 当接受到游戏结束信息，该信息是胜方发给败方的，因此结合本方颜色判断结束界面
+        if msg.tg == 1 and self.side == 1:
+            self.tag = 30
+        elif msg.tg == 1 and self.side == 0:
+            self.tag = 31
+
+        # 收到对方认输信号
+        if msg.tg == 2:
+            temp_msg = Mess()
+            temp_msg.create_mess(1, Black_chess_init)
+            self.send_info(temp_msg)
+            self.tag = 31
+
+        rcv_data = msg.chess_text
+        # 换方需对矩阵进行180度旋转
+        for i in range(5):
+            for j in range(9):
+                temp = rcv_data[i][j]
+                rcv_data[i][j] = rcv_data[9 - i][8 - j]
+                rcv_data[9 - i][8 - j] = temp
+        # 如果接收到的棋盘与已有棋盘不同，则更新棋盘
+        if self.chess_info != rcv_data:
+            self.chess_info = rcv_data
+            # 轮到己方行动
+            self.able_move = 1
+
 
 def main():
     # 初始化
@@ -182,6 +209,12 @@ def main():
 
         # 若为游戏界面
         if black.tag == 2:
+            # 若己方认输
+            if black.surrender == 1:
+                msg.create_mess(2, Black_chess_init)
+                black.send_info(msg)
+                black.surrender = 0
+
             # 传输棋子信息矩阵
             black.send_info(msg)
 
