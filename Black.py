@@ -58,16 +58,19 @@ class BlackSide(Draw_Related.DrawType):
         # 标记自身是服务端还是客户端， 0表示客户端， 1表示服务端
         self.s_or_c = 0
 
+        # 绑定服务器接口
+        self.s.bind(ip_black_server)
+
+        # 服务器进入监听模式
+        self.s.listen(1)
+
     # 创建连接，两种方式
     def build_connect(self):
         # 作为服务器时
         if self.start_or_join == 1:
             # 成为服务端
             self.s_or_c = 1
-            # 绑定服务器接口
-            self.s.bind(ip_black_server)
-            # 服务器进入监听模式
-            self.s.listen(1)
+
             # 绑定wait_thread线程和waiting函数
             self.wait_thread = threading.Thread(target=self.waiting)
             # 启动子线程wait_thread
@@ -130,9 +133,9 @@ class BlackSide(Draw_Related.DrawType):
     # 发送
     def send_info(self, msg):
         if self.start_or_join == 1:
-            self.conn.sendall(pickle.dumps(msg))
+            self.conn.send(pickle.dumps(msg))
         else:
-            self.c.sendall(pickle.dumps(msg))
+            self.c.send(pickle.dumps(msg))
 
     def solve_rcv(self, msg):
         # 当接受到游戏结束信息，该信息是胜方发给败方的，因此结合本方颜色判断结束界面
@@ -149,6 +152,7 @@ class BlackSide(Draw_Related.DrawType):
             self.tag = 31
 
         rcv_data = msg.chess_text
+        print(rcv_data)
         # 换方需对矩阵进行180度旋转
         for i in range(5):
             for j in range(9):
@@ -165,6 +169,7 @@ class BlackSide(Draw_Related.DrawType):
 def main():
     # 初始化
     black = BlackSide()
+    black.chess_info = Black_chess_init
 
     # 主循环
     while True:
@@ -209,14 +214,17 @@ def main():
 
         # 若为游戏界面
         if black.tag == 2:
+
+            # 传输棋子信息矩阵
+            if black.change:
+                black.send_info(msg)
+                black.change = 0
+
             # 若己方认输
             if black.surrender == 1:
                 msg.create_mess(2, Black_chess_init)
                 black.send_info(msg)
                 black.surrender = 0
-
-            # 传输棋子信息矩阵
-            black.send_info(msg)
 
             # 绘制棋子
             black.draw_chess()

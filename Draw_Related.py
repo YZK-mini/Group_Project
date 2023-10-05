@@ -21,6 +21,32 @@ chess_number = {
     16: 'images/黑炮.png',
     17: 'images/黑卒.png',
 }
+# 红方初始棋子位置
+Red_chess_init = [
+    [11, 12, 13, 14, 15, 14, 13, 12, 11],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 16, 0, 0, 0, 0, 0, 16, 0],
+    [17, 0, 17, 0, 17, 0, 17, 0, 17],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [7, 0, 7, 0, 7, 0, 7, 0, 7],
+    [0, 6, 0, 0, 0, 0, 0, 6, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 2, 3, 4, 5, 4, 3, 2, 1],
+]
+# 黑方初始棋子位置
+Black_chess_init = [
+    [1, 2, 3, 4, 5, 4, 3, 2, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 6, 0, 0, 0, 0, 0, 6, 0],
+    [7, 0, 7, 0, 7, 0, 7, 0, 7],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [17, 0, 17, 0, 17, 0, 17, 0, 17],
+    [0, 16, 0, 0, 0, 0, 0, 16, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [11, 12, 13, 14, 15, 14, 13, 12, 11],
+]
 
 
 # 将网格位置转化为窗口坐标
@@ -125,6 +151,9 @@ class DrawType:
 
         # 棋子初始坐标
         self.chess_info = None
+
+        # 棋子移动标识
+        self.change = 0
 
         # 求和标识
         self.tie = 0
@@ -247,7 +276,6 @@ class DrawType:
 
             # 若为己方棋子，且未选中，且轮到本方下棋则显示选中
             else:
-
                 self.choice = grid_to_pos(self.cur[0], self.cur[1])
                 self.choice_ready = self.cur  # 用于保存已经选择的棋子信息
                 self.image_selected = True  # 是否选中图片的标志
@@ -259,7 +287,17 @@ class DrawType:
                     self.red_return1[1] < mouse_pos[1] < self.red_return2[1]):
                 # 修改标识符
                 self.tag = 2
+                # 还原棋盘
+                if self.side == 0:
+                    self.chess_info = Red_chess_init
+                    self.able_move = 1
+                else:
+                    self.chess_info = Black_chess_init
+                    self.able_move = 0
+                self.choice = (-1, -1)
+                self.image_selected = False
                 return
+
             # 判断是否点击'退出'按钮
             if (self.red_exit1[0] < mouse_pos[0] < self.red_exit2[0]) and (
                     self.red_exit1[1] < mouse_pos[1] < self.red_exit2[1]):
@@ -272,7 +310,17 @@ class DrawType:
                     self.black_return1[1] < mouse_pos[1] < self.black_return2[1]):
                 # 修改标识符
                 self.tag = 2
+                # 还原棋盘
+                if self.side == 0:
+                    self.chess_info = Red_chess_init
+                    self.able_move = 1
+                else:
+                    self.chess_info = Black_chess_init
+                    self.able_move = 0
+                self.choice = (-1, -1)
+                self.image_selected = False
                 return
+
             # 判断是否点击'退出'按钮
             if (self.black_exit1[0] < mouse_pos[0] < self.black_exit2[0]) and (
                     self.black_exit1[1] < mouse_pos[1] < self.black_exit2[1]):
@@ -330,6 +378,7 @@ class DrawType:
             self.chess_info[self.cur[0]][self.cur[1]] = chess
 
             # 走完后，当前无选中位置
+            self.change = 1
             self.image_selected = False
             self.choice = (-1, -1)
             # 轮到对方行动
