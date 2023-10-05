@@ -253,12 +253,12 @@ class DrawType:
                     self.tie = 1
 
             # 若点击'认输'按钮
-            if (self.surrender_button1[0] < mouse_pos[0] < self.surrender_button2[0]) and (
+            elif (self.surrender_button1[0] < mouse_pos[0] < self.surrender_button2[0]) and (
                     self.surrender_button1[1] < mouse_pos[1] < self.surrender_button2[1]):
                 self.surrender = 1
 
             # 若未轮到本方
-            if self.able_move == 0:
+            elif self.able_move == 0:
                 print('请等待对方下棋')
                 pass
 
@@ -283,7 +283,7 @@ class DrawType:
                     pass
 
             # 若为己方棋子，且未选中，且轮到本方下棋则显示选中
-            else:
+            elif mouse_pos[0] <= 577:
                 self.choice = grid_to_pos(self.cur[0], self.cur[1])
                 self.choice_ready = self.cur  # 用于保存已经选择的棋子信息
                 self.image_selected = True  # 是否选中图片的标志
