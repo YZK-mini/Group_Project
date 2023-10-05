@@ -31,15 +31,15 @@ class Mess:
         self.chess_text = [[]]
 
     # 创建数据传输的类，需要本方的移动信息
-    def create_Mess(self, Tag, Chess_info):
-        self.tg = Tag
-        self.chess_text = Chess_info
+    def create_mess(self, tag, chess_info):
+        self.tg = tag
+        self.chess_text = chess_info
 
 
 # 红方类
-class Black_Side(Draw_Related.objection):
+class BlackSide(Draw_Related.DrawType):
     def __init__(self):
-        super(Black_Side, self).__init__()
+        super(BlackSide, self).__init__()
 
         # 表明自己为黑方
         self.side = 1
@@ -61,7 +61,7 @@ class Black_Side(Draw_Related.objection):
     # 创建连接，两种方式
     def build_connect(self):
         # 作为服务器时
-        if self.start_OR_join == 1:
+        if self.start_or_join == 1:
             # 成为服务端
             self.s_or_c = 1
             # 绑定服务器接口
@@ -74,7 +74,7 @@ class Black_Side(Draw_Related.objection):
             self.wait_thread.start()
 
         # 作为客户端时
-        elif self.start_OR_join == 2:
+        elif self.start_or_join == 2:
             # 成为客户端
             self.s_or_c = 0
             # 初始化棋子位置
@@ -127,71 +127,69 @@ class Black_Side(Draw_Related.objection):
                 except pickle.UnpicklingError:
                     pass
 
+    # 发送
+    def send_info(self, msg):
+        if self.start_or_join == 1:
+            self.conn.sendall(pickle.dumps(msg))
+        else:
+            self.c.sendall(pickle.dumps(msg))
+
 
 def main():
     # 初始化
-    Black = Black_Side()
+    black = BlackSide()
 
     # 主循环
     while True:
 
         # 每次事件检测前的tag
-        ps_tag = Black.tag
+        ps_tag = black.tag
 
         # 窗口刷新率设为60
-        Black.clock.tick(60)
+        black.clock.tick(60)
 
         # 操作信息检测
-        Black.tag = Black.check_movement()
+        black.tag = black.check_movement()
 
         # 建立连接
         # 初始为0，事件检测后为1，启动游戏；初始为0，事件检测后为2，加入游戏
-        if (Black.tag == 1 or Black.tag == 2) and ps_tag == 0:
-            Black.build_connect()
+        if (black.tag == 1 or black.tag == 2) and ps_tag == 0 and black.start_or_join != 0:
+            black.build_connect()
 
         # tag由1变0，等待界面返回开始界面，停止连接等待进程
-        if Black.tag == 0 and ps_tag == 1:
-            Black.wait_thread._running = False
+        if black.tag == 0 and ps_tag == 1:
+            black.wait_thread._running = False
 
         # 背景绘制
-        Black.bg_draw()
+        black.bg_draw()
 
         # 创建传输信息
         msg = Mess()
         # 游戏结束瞬间
-        if ps_tag == 2 and Black.tag == 31:
-            msg.create_Mess(1, Black_chess_init)
+        if ps_tag == 2 and black.tag == 31:
+            msg.create_mess(1, Black_chess_init)
             # 传输棋子信息矩阵
-            if Black.s_or_c:
-                Black.conn.sendall(pickle.dumps(msg))
-            else:
-                Black.c.sendall(pickle.dumps(msg))
+            black.send_info(msg)
         # 游戏重启
-        elif (ps_tag == 30 or ps_tag == 31) and Black.tag == 2:
-            msg.create_Mess(0, Black_chess_init)
+        elif (ps_tag == 30 or ps_tag == 31) and black.tag == 2:
+            msg.create_mess(0, Black_chess_init)
             # 传输棋子信息矩阵
-            if Black.s_or_c:
-                Black.conn.sendall(pickle.dumps(msg))
-            else:
-                Black.c.sendall(pickle.dumps(msg))
-            Black.able_move = 0
+            black.send_info(msg)
+            black.able_move = 0
         # 游戏其他时间
         else:
-            msg.create_Mess(0, Black.chess_info)
+            msg.create_mess(0, black.chess_info)
 
         # 若为游戏界面
-        if Black.tag == 2:
+        if black.tag == 2:
             # 传输棋子信息矩阵
-            if Black.s_or_c:
-                Black.conn.sendall(pickle.dumps(msg))
-            else:
-                Black.c.sendall(pickle.dumps(msg))
+            black.send_info(msg)
 
             # 绘制棋子
-            Black.draw_chess()
+            black.draw_chess()
 
         # 显示screen内容
-        Black.Update()
+        black.update()
 
 
 if __name__ == '__main__':

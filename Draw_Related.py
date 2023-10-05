@@ -24,19 +24,19 @@ chess_number = {
 
 
 # 将网格位置转化为窗口坐标
-def Grid_to_Pos(posX, posY):
+def grid_to_pos(pos_x, pos_y):
     # 每个格子距离57.5，为了实际显示效果作了2.5的偏移
-    return 57.5 * posY + 2.5, 57.5 * posX + 2.5
+    return 57.5 * pos_y + 2.5, 57.5 * pos_x + 2.5
 
 
 # 点击坐标转换为网格位置
-def Pos_to_Grid(coX, coY):
-    x = coX // 57.5
+def pos_to_grid(co_x, co_y):
+    x = co_x // 57.5
     x = x if x >= 0 else 0
     x = x if x <= 8 else 8
     x = math.floor(x)
 
-    y = coY // 57.5
+    y = co_y // 57.5
     y = y if y >= 0 else 0
     y = y if y <= 9 else 9
     y = math.floor(y)
@@ -44,7 +44,7 @@ def Pos_to_Grid(coX, coY):
     return y, x
 
 
-class objection:
+class DrawType:
     # 初始化函数
     def __init__(self):
         # 红方或黑方标志，0表示红方，1表示黑方
@@ -52,7 +52,7 @@ class objection:
         # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，3表示结束界面
         self.tag = 0
         # 开始界面按钮标识，0表示未选，1表示选择‘启动游戏’，2表示选择‘加入游戏’
-        self.start_OR_join = 0
+        self.start_or_join = 0
 
         # 选中的位置
         self.choice = (-1, -1)
@@ -170,13 +170,13 @@ class objection:
                     self.start_button1[1] < mouse_pos[1] < self.start_button2[1]):
                 # 修改标识符
                 self.tag = 1
-                self.start_OR_join = 1
+                self.start_or_join = 1
                 return
             # 判断是否点击‘加入游戏’按钮
             if (self.join_button1[0] < mouse_pos[0] < self.join_button2[0]) and (
                     self.join_button1[1] < mouse_pos[1] < self.join_button2[1]):
                 # 修改标识符
-                self.start_OR_join = 2
+                self.start_or_join = 2
                 self.tag = 2
                 return
 
@@ -192,7 +192,7 @@ class objection:
         # 若处于游戏界面
         if self.tag == 2:
             # 判断点击的是哪一个格子
-            self.cur = Pos_to_Grid(mouse_pos[0], mouse_pos[1])
+            self.cur = pos_to_grid(mouse_pos[0], mouse_pos[1])
 
             # 若未轮到本方
             if self.able_move == 0:
@@ -222,7 +222,7 @@ class objection:
             # 若为己方棋子，且未选中，且轮到本方下棋则显示选中
             else:
 
-                self.choice = Grid_to_Pos(self.cur[0], self.cur[1])
+                self.choice = grid_to_pos(self.cur[0], self.cur[1])
                 self.choice_ready = self.cur  # 用于保存已经选择的棋子信息
                 self.image_selected = True  # 是否选中图片的标志
 
@@ -233,7 +233,6 @@ class objection:
                     self.red_return1[1] < mouse_pos[1] < self.red_return2[1]):
                 # 修改标识符
                 self.tag = 2
-                self.start_OR_join = 0
                 return
             # 判断是否点击'退出'按钮
             if (self.red_exit1[0] < mouse_pos[0] < self.red_exit2[0]) and (
@@ -247,7 +246,6 @@ class objection:
                     self.black_return1[1] < mouse_pos[1] < self.black_return2[1]):
                 # 修改标识符
                 self.tag = 2
-                self.start_OR_join = 0
                 return
             # 判断是否点击'退出'按钮
             if (self.black_exit1[0] < mouse_pos[0] < self.black_exit2[0]) and (
@@ -256,8 +254,12 @@ class objection:
                 sys.exit()
 
     def solve_rcv(self, msg):
-        if msg.tg == 1:
+        # 当接受到游戏结束信息，该信息是胜方发给败方的，因此结合本方颜色判断结束界面
+        if msg.tg == 1 and self.side == 1:
             self.tag = 30
+        elif msg.tg == 1 and self.side == 0:
+            self.tag = 31
+
         rcv_data = msg.chess_text
         # 换方需对矩阵进行180度旋转
         for i in range(5):
@@ -282,7 +284,7 @@ class objection:
                 # 该位置不为空，在chess_number字典中查找该棋子对应图片的文件名，并绘制
                 else:
                     temp_image = pygame.image.load(chess_number.get(self.chess_info[i][j]))
-                    self.screen.blit(temp_image, Grid_to_Pos(i, j))
+                    self.screen.blit(temp_image, grid_to_pos(i, j))
         # 正确选择的位置出现蓝色四方形框
         if self.choice != (-1, -1):
             self.screen.blit(self.block_image, self.choice)
@@ -294,7 +296,7 @@ class objection:
             self.can_moves = Chess.where_can_move(self.chess_info, cur_pos)
             # 绘制移动提示
             for grid in self.can_moves:
-                position = Grid_to_Pos(grid[0], grid[1])
+                position = grid_to_pos(grid[0], grid[1])
                 self.screen.blit(self.tip_image, (position[0] + 17.5, position[1] + 17.5))
 
     # 移动棋子到对应位置
@@ -315,6 +317,7 @@ class objection:
             if self.chess_info[next_pos[0]][next_pos[1]] == 15:
                 print('将已死')
                 self.tag = 30
+
             # 若想要移动的位置在可以移动的位置列表内，则执行吃子或移动
             chess = self.chess_info[self.choice_ready[0]][self.choice_ready[1]]
             self.chess_info[self.choice_ready[0]][self.choice_ready[1]] = 0
@@ -333,5 +336,5 @@ class objection:
 
     # 更新窗口内容
     @staticmethod
-    def Update():
+    def update():
         pygame.display.update()

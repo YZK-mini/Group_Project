@@ -31,15 +31,15 @@ class Mess:
         self.chess_text = [[]]
 
     # 创建数据传输的类，需要本方的移动信息
-    def create_Mess(self, Tag, Chess_info):
-        self.tg = Tag
-        self.chess_text = Chess_info
+    def create_mess(self, tag, chess_info):
+        self.tg = tag
+        self.chess_text = chess_info
 
 
 # 红方类
-class Red_Side(Draw_Related.objection):
+class RedSide(Draw_Related.DrawType):
     def __init__(self):
-        super(Red_Side, self).__init__()
+        super(RedSide, self).__init__()
 
         # 表明自己为红方
         self.side = 0
@@ -61,7 +61,7 @@ class Red_Side(Draw_Related.objection):
     # 创建连接，两种方式
     def build_connect(self):
         # 作为服务器时
-        if self.start_OR_join == 1:
+        if self.start_or_join == 1:
             # 成为服务端
             self.s_or_c = 1
             # 绑定服务器接口
@@ -75,7 +75,7 @@ class Red_Side(Draw_Related.objection):
             self.wait_thread.start()
 
         # 作为客户端时
-        elif self.start_OR_join == 2:
+        elif self.start_or_join == 2:
             # 成为客户端
             self.s_or_c = 0
             # 初始化棋子位置
@@ -128,71 +128,68 @@ class Red_Side(Draw_Related.objection):
                 except pickle.UnpicklingError:
                     pass
 
+    # 发送
+    def send_info(self, msg):
+        if self.start_or_join == 1:
+            self.conn.sendall(pickle.dumps(msg))
+        else:
+            self.c.sendall(pickle.dumps(msg))
+
 
 def main():
     # 初始化
-    Red = Red_Side()
+    red = RedSide()
 
     # 主循环
     while True:
 
         # 每次事件检测前的tag
-        ps_tag = Red.tag
+        ps_tag = red.tag
 
         # 窗口刷新率设为60
-        Red.clock.tick(60)
+        red.clock.tick(60)
 
         # 操作信息检测
-        Red.tag = Red.check_movement()
+        red.tag = red.check_movement()
 
         # 建立连接
         # 初始为0，事件检测后为1，启动游戏；初始为0，事件检测后为2，加入游戏
-        if (Red.tag == 1 or Red.tag == 2) and ps_tag == 0:
-            Red.build_connect()
+        if (red.tag == 1 or red.tag == 2) and ps_tag == 0:
+            red.build_connect()
 
         # tag由1变0，等待界面返回开始界面，停止连接等待进程
-        if Red.tag == 0 and ps_tag == 1:
-            Red.wait_thread._running = False
+        if red.tag == 0 and ps_tag == 1:
+            red.wait_thread._running = False
 
         # 背景绘制
-        Red.bg_draw()
+        red.bg_draw()
 
         # 创建传输信息
         msg = Mess()
         # 游戏结束瞬间
-        if ps_tag == 2 and Red.tag == 30:
-            msg.create_Mess(1, Red_chess_init)
+        if ps_tag == 2 and red.tag == 30:
+            msg.create_mess(1, Red_chess_init)
             # 传输棋子信息矩阵
-            if Red.s_or_c:
-                Red.conn.sendall(pickle.dumps(msg))
-            else:
-                Red.c.sendall(pickle.dumps(msg))
+            red.send_info(msg)
         # 游戏重启
-        elif (ps_tag == 30 or ps_tag == 31) and Red.tag == 2:
-            msg.create_Mess(0, Red_chess_init)
+        elif (ps_tag == 30 or ps_tag == 31) and red.tag == 2:
+            msg.create_mess(0, Red_chess_init)
             # 传输棋子信息矩阵
-            if Red.s_or_c:
-                Red.conn.sendall(pickle.dumps(msg))
-            else:
-                Red.c.sendall(pickle.dumps(msg))
-            Red.able_move = 1
+            red.send_info(msg)
         # 游戏其他时间
         else:
-            msg.create_Mess(0, Red.chess_info)
+            msg.create_mess(0, red.chess_info)
 
         # 若为游戏界面
-        if Red.tag == 2:
+        if red.tag == 2:
             # 传输棋子信息矩阵
-            if Red.s_or_c:
-                Red.conn.sendall(pickle.dumps(msg))
-            else:
-                Red.c.sendall(pickle.dumps(msg))
+            red.send_info(msg)
 
             # 绘制棋子
-            Red.draw_chess()
+            red.draw_chess()
 
         # 显示screen内容
-        Red.Update()
+        red.update()
 
 
 if __name__ == '__main__':
