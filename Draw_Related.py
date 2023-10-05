@@ -158,8 +158,9 @@ class DrawType:
         # 求和标识
         self.tie = 0
         # 和棋提示
-        self.surrender_image = pygame.image.load('images/求和提示.png')
-        self.surrender_pos = (18, 590)
+        self.tie_accept_image = pygame.image.load('images/接受求和提示.png')
+        self.tie_acquire_image = pygame.image.load('images/发出求和提示.png')
+        self.tie_pos = (18, 590)
 
         # 认输标识
         self.surrender = 0
@@ -183,6 +184,10 @@ class DrawType:
         elif self.tag == 31:
             # tag为31时，黑方胜界面，屏幕画上黑方胜界面图片
             self.end_img = pygame.image.load('images/黑方胜.png')
+            self.screen.blit(self.end_img, (0, 0))
+        elif self.tag == 32:
+            # tag为32时，平局界面，屏幕画上平局界面图片
+            self.end_img = pygame.image.load('images/平局.png')
             self.screen.blit(self.end_img, (0, 0))
 
     # 事件检测函数
@@ -242,7 +247,10 @@ class DrawType:
             # 若点击'和棋'按钮
             if (self.tie_button1[0] < mouse_pos[0] < self.tie_button2[0]) and (
                     self.tie_button1[1] < mouse_pos[1] < self.tie_button2[1]):
-                self.tie = 1
+                if self.tie == 2:
+                    self.tie = 4
+                else:
+                    self.tie = 1
 
             # 若点击'认输'按钮
             if (self.surrender_button1[0] < mouse_pos[0] < self.surrender_button2[0]) and (
@@ -281,7 +289,7 @@ class DrawType:
                 self.image_selected = True  # 是否选中图片的标志
 
         # 若处于结束界面
-        if self.tag == 30:
+        if self.tag == 30 or self.tag == 31 or self.tag == 32:
             # 判断是否点击’再来一局‘按钮
             if (self.red_return1[0] < mouse_pos[0] < self.red_return2[0]) and (
                     self.red_return1[1] < mouse_pos[1] < self.red_return2[1]):
@@ -301,29 +309,6 @@ class DrawType:
             # 判断是否点击'退出'按钮
             if (self.red_exit1[0] < mouse_pos[0] < self.red_exit2[0]) and (
                     self.red_exit1[1] < mouse_pos[1] < self.red_exit2[1]):
-                pygame.quit()
-                sys.exit()
-
-        if self.tag == 31:
-            # 判断是否点击’返回开始界面‘按钮
-            if (self.black_return1[0] < mouse_pos[0] < self.black_return2[0]) and (
-                    self.black_return1[1] < mouse_pos[1] < self.black_return2[1]):
-                # 修改标识符
-                self.tag = 2
-                # 还原棋盘
-                if self.side == 0:
-                    self.chess_info = Red_chess_init
-                    self.able_move = 1
-                else:
-                    self.chess_info = Black_chess_init
-                    self.able_move = 0
-                self.choice = (-1, -1)
-                self.image_selected = False
-                return
-
-            # 判断是否点击'退出'按钮
-            if (self.black_exit1[0] < mouse_pos[0] < self.black_exit2[0]) and (
-                    self.black_exit1[1] < mouse_pos[1] < self.black_exit2[1]):
                 pygame.quit()
                 sys.exit()
 
@@ -352,6 +337,13 @@ class DrawType:
             for grid in self.can_moves:
                 position = grid_to_pos(grid[0], grid[1])
                 self.screen.blit(self.tip_image, (position[0] + 17.5, position[1] + 17.5))
+
+    # 绘制额外图片
+    def draw_picture(self):
+        if self.tie == 2:
+            self.screen.blit(self.tie_accept_image, self.tie_pos)
+        if self.tie == 3:
+            self.screen.blit(self.tie_acquire_image, self.tie_pos)
 
     # 移动棋子到对应位置
     def move_chess(self):

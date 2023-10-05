@@ -151,6 +151,15 @@ class BlackSide(Draw_Related.DrawType):
             self.send_info(temp_msg)
             self.tag = 31
 
+        # 收到请求和棋的信号
+        if msg.tg == 3:
+            self.tie = 2
+
+        # 收到对方接受和棋的信号
+        if msg.tg == 4:
+            self.tie = 0
+            self.tag = 32
+
         rcv_data = msg.chess_text
         print(rcv_data)
         # 换方需对矩阵进行180度旋转
@@ -203,7 +212,7 @@ def main():
             # 传输棋子信息矩阵
             black.send_info(msg)
         # 游戏重启
-        elif (ps_tag == 30 or ps_tag == 31) and black.tag == 2:
+        elif (ps_tag == 30 or ps_tag == 31 or ps_tag == 32) and black.tag == 2:
             msg.create_mess(0, Black_chess_init)
             # 传输棋子信息矩阵
             black.send_info(msg)
@@ -220,6 +229,19 @@ def main():
                 black.send_info(msg)
                 black.change = 0
 
+            # 若己方请求和棋
+            if black.tie == 1:
+                msg.create_mess(3, black.chess_info)
+                black.send_info(msg)
+                black.tie = 3
+
+            # 若己方接受和棋
+            if black.tie == 4:
+                msg.create_mess(4, Black_chess_init)
+                black.send_info(msg)
+                black.tag = 32
+                black.tie = 0
+
             # 若己方认输
             if black.surrender == 1:
                 msg.create_mess(2, Black_chess_init)
@@ -228,6 +250,9 @@ def main():
 
             # 绘制棋子
             black.draw_chess()
+
+            # 绘制额外图片
+            black.draw_picture()
 
         # 显示screen内容
         black.update()

@@ -151,6 +151,15 @@ class RedSide(Draw_Related.DrawType):
             self.send_info(temp_msg)
             self.tag = 30
 
+        # 收到请求和棋的信号
+        if msg.tg == 3:
+            self.tie = 2
+
+        # 收到对方接受和棋的信号
+        if msg.tg == 4:
+            self.tie = 0
+            self.tag = 32
+
         rcv_data = msg.chess_text
         print(rcv_data)
         # 换方需对矩阵进行180度旋转
@@ -203,7 +212,7 @@ def main():
             # 传输棋子信息矩阵
             red.send_info(msg)
         # 游戏重启
-        elif (ps_tag == 30 or ps_tag == 31) and red.tag == 2:
+        elif (ps_tag == 30 or ps_tag == 31 or ps_tag == 32) and red.tag == 2:
             msg.create_mess(0, Red_chess_init)
             # 传输棋子信息矩阵
             red.send_info(msg)
@@ -218,6 +227,19 @@ def main():
                 red.send_info(msg)
                 red.change = 0
 
+            # 若己方请求和棋
+            if red.tie == 1:
+                msg.create_mess(3, red.chess_info)
+                red.send_info(msg)
+                red.tie = 3
+
+            # 若己方接受和棋
+            if red.tie == 4:
+                msg.create_mess(4, Red_chess_init)
+                red.send_info(msg)
+                red.tag = 32
+                red.tie = 0
+
             # 若己方认输
             if red.surrender == 1:
                 msg.create_mess(2, Red_chess_init)
@@ -226,6 +248,9 @@ def main():
 
             # 绘制棋子
             red.draw_chess()
+
+            # 绘制额外图片
+            red.draw_picture()
 
         # 显示screen内容
         red.update()
