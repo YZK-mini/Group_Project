@@ -1,5 +1,7 @@
 def che_check(chess_info, cur_grid, cur_chess_num):
+    # 可移动位置的列表
     cur_can_move = []
+    # 判断当前棋子颜色
     side = cur_chess_num // 10
     # 扫描当前行可移动位置
     temp_y = cur_grid[1] - 1
@@ -60,7 +62,9 @@ def che_check(chess_info, cur_grid, cur_chess_num):
 
 
 def horse_check(chess_info, cur_grid, cur_chess_num):
+    # 可移动位置的列表
     cur_can_move = []
+    # 判断当前棋子颜色
     side = cur_chess_num // 10
     # 向上走;没顶格，没被棋子挡住马脚
     if cur_grid[0] >= 2 and chess_info[cur_grid[0] - 1][cur_grid[1]] == 0:
@@ -111,7 +115,9 @@ def horse_check(chess_info, cur_grid, cur_chess_num):
 
 
 def xiang_check(chess_info, cur_grid, cur_chess_num):
+    # 可移动位置的列表
     cur_can_move = []
+    # 判断当前棋子颜色
     side = cur_chess_num // 10
     # 左上
     if cur_grid[1] != 0 and cur_grid[0] != 5:
@@ -146,7 +152,9 @@ def xiang_check(chess_info, cur_grid, cur_chess_num):
 
 
 def shi_check(chess_info, cur_grid, cur_chess_num):
+    # 可移动位置的列表
     cur_can_move = []
+    # 判断当前棋子颜色
     side = cur_chess_num // 10
     # 左上
     if cur_grid[1] != 3 and cur_grid[0] != 7:
@@ -173,7 +181,9 @@ def shi_check(chess_info, cur_grid, cur_chess_num):
 
 
 def shuai_check(chess_info, cur_grid, cur_chess_num):
+    # 可移动位置的列表
     cur_can_move = []
+    # 判断当前棋子颜色
     side = cur_chess_num // 10
     # 上
     if cur_grid[0] != 7:
@@ -200,13 +210,16 @@ def shuai_check(chess_info, cur_grid, cur_chess_num):
 
 
 def pao_check(chess_info, cur_grid, cur_chess_num):
+    # 可移动位置的列表
     cur_can_move = []
+    # 判断当前棋子颜色
     side = cur_chess_num // 10
 
     # 列移动
     temp_y = cur_grid[1] - 1
     # 向左遍历
     off_set_y = -1
+    # 跳板标识
     barrier = False
     while True:
         # 碰到左边界，调头向右
@@ -245,6 +258,7 @@ def pao_check(chess_info, cur_grid, cur_chess_num):
     temp_x = cur_grid[0] - 1
     # 向上遍历
     off_set_x = -1
+    # 跳板标识
     barrier = False
     while True:
         if temp_x < 0:
@@ -282,15 +296,17 @@ def pao_check(chess_info, cur_grid, cur_chess_num):
 
 
 def bing_check(chess_info, cur_grid, cur_chess_num):
+    # 可移动位置的列表
     cur_can_move = []
+    # 判断当前棋子颜色
     side = cur_chess_num // 10
-
+    # 无论是否过河都有向前行走的选项，除非顶格
     if cur_grid[0] != 0:
         temp_chess = chess_info[cur_grid[0] - 1][cur_grid[1]]
         if side != temp_chess // 10 or temp_chess == 0:
             # 拱卒
             cur_can_move.append((cur_grid[0] - 1, cur_grid[1]))
-    # 若已过河
+    # 若已过河，则增加横向走的选项
     if cur_grid[0] <= 4:
         if cur_grid[1] != 0:
             temp_chess = chess_info[cur_grid[0]][cur_grid[1] - 1]
@@ -306,6 +322,7 @@ def bing_check(chess_info, cur_grid, cur_chess_num):
     return cur_can_move
 
 
+# 用check_function存储对应棋子的行走规则函数
 check_function = {1: che_check,
                   2: horse_check,
                   3: xiang_check,
@@ -317,6 +334,7 @@ check_function = {1: che_check,
 
 # 查找可以该棋子可走的位置
 def where_can_move(chess_info: list[list[int]], choice: tuple):
+    # 当前棋子信息
     cur_chess = chess_info[choice[0]][choice[1]]
-    temp = check_function.get(cur_chess % 10)(chess_info, choice, cur_chess)
-    return temp
+    # 返回可移动位置的列表
+    return check_function.get(cur_chess % 10)(chess_info, choice, cur_chess)

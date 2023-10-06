@@ -21,32 +21,6 @@ chess_number = {
     16: 'images/黑炮.png',
     17: 'images/黑卒.png',
 }
-# 红方初始棋子位置
-Red_chess_init = [
-    [11, 12, 13, 14, 15, 14, 13, 12, 11],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 16, 0, 0, 0, 0, 0, 16, 0],
-    [17, 0, 17, 0, 17, 0, 17, 0, 17],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [7, 0, 7, 0, 7, 0, 7, 0, 7],
-    [0, 6, 0, 0, 0, 0, 0, 6, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 2, 3, 4, 5, 4, 3, 2, 1],
-]
-# 黑方初始棋子位置
-Black_chess_init = [
-    [1, 2, 3, 4, 5, 4, 3, 2, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 6, 0, 0, 0, 0, 0, 6, 0],
-    [7, 0, 7, 0, 7, 0, 7, 0, 7],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [17, 0, 17, 0, 17, 0, 17, 0, 17],
-    [0, 16, 0, 0, 0, 0, 0, 16, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [11, 12, 13, 14, 15, 14, 13, 12, 11],
-]
 
 
 # 将网格位置转化为窗口坐标
@@ -74,6 +48,33 @@ class DrawType:
     # 初始化函数
     def __init__(self):
         self.times = 0
+
+        # 红方初始棋子位置
+        self.Red_chess_init = [
+            [11, 12, 13, 14, 15, 14, 13, 12, 11],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 16, 0, 0, 0, 0, 0, 16, 0],
+            [17, 0, 17, 0, 17, 0, 17, 0, 17],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [7, 0, 7, 0, 7, 0, 7, 0, 7],
+            [0, 6, 0, 0, 0, 0, 0, 6, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 2, 3, 4, 5, 4, 3, 2, 1],
+        ]
+        # 黑方初始棋子位置
+        self.Black_chess_init = [
+            [1, 2, 3, 4, 5, 4, 3, 2, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 6, 0, 0, 0, 0, 0, 6, 0],
+            [7, 0, 7, 0, 7, 0, 7, 0, 7],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [17, 0, 17, 0, 17, 0, 17, 0, 17],
+            [0, 16, 0, 0, 0, 0, 0, 16, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [11, 12, 13, 14, 15, 14, 13, 12, 11],
+        ]
 
         # 红方或黑方标志，0表示红方，1表示黑方
         self.side = 0
@@ -176,12 +177,13 @@ class DrawType:
         # 音乐部分
         # 背景音乐
         pygame.mixer.music.load('Sounds/bgm.ogg')
-        pygame.mixer.music.set_volume(0.05)
+        pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play()
+        pygame.mixer.music.rewind()
 
         # 开始游戏音乐
         self.start_music = pygame.mixer.Sound('Sounds/开始游戏.ogg')
-        self.start_music.set_volume(0.1)
+        self.start_music.set_volume(0.3)
         # 结束游戏音乐
         self.end_music = pygame.mixer.Sound('Sounds/结束游戏.ogg')
         # 将军
@@ -195,7 +197,7 @@ class DrawType:
         self.choice_music.set_volume(0.7)
         # 按钮
         self.button_music = pygame.mixer.Sound('Sounds/按钮.ogg')
-        self.button_music.set_volume(0.3)
+        self.button_music.set_volume(0.4)
 
     # 背景绘制
     def bg_draw(self):
@@ -337,13 +339,14 @@ class DrawType:
                 self.tag = 2
                 # 还原棋盘
                 if self.side == 0:
-                    self.chess_info = Red_chess_init
+                    self.chess_info = self.Red_chess_init
                     self.able_move = 1
                 else:
-                    self.chess_info = Black_chess_init
+                    self.chess_info = self.Black_chess_init
                     self.able_move = 0
-                self.warn = 0
+
                 self.choice = (-1, -1)
+                self.warn = 0
                 self.tie = 0
                 self.surrender = 0
                 self.image_selected = False
