@@ -6,7 +6,7 @@ import pickle
 # 当黑方发起游戏的ip地址
 ip_black_server = ('127.0.0.1', 5000)  # 若联机，更改此处为本机ip及端口
 # 当黑方加入游戏需要连接的ip地址
-ip_black_client = ('127.0.0.1', 8000)  # 若联机，更改此处为对方主机ip及端口
+ip_black_client = ('10.17.52.206', 8000)  # 若联机，更改此处为对方主机ip及端口
 # 传输的尺寸限制
 buf_size = 512
 # 黑方初始棋子位置
@@ -158,6 +158,7 @@ class BlackSide(Draw_Related.DrawType):
         # 收到对方接受和棋的信号
         if msg.tg == 4:
             self.tie = 0
+            self.surrender = 0
             self.tag = 32
 
         rcv_data = msg.chess_text
@@ -240,6 +241,7 @@ def main():
                 msg.create_mess(4, Black_chess_init)
                 black.send_info(msg)
                 black.tag = 32
+                black.surrender = 0
                 black.tie = 0
 
             # 若己方认输
@@ -247,6 +249,7 @@ def main():
                 msg.create_mess(2, Black_chess_init)
                 black.send_info(msg)
                 black.surrender = 0
+                black.tie = 0
 
             # 绘制棋子
             black.draw_chess()

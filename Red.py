@@ -158,6 +158,7 @@ class RedSide(Draw_Related.DrawType):
         # 收到对方接受和棋的信号
         if msg.tg == 4:
             self.tie = 0
+            self.surrender = 0
             self.tag = 32
 
         rcv_data = msg.chess_text
@@ -239,11 +240,13 @@ def main():
                 red.send_info(msg)
                 red.tag = 32
                 red.tie = 0
+                red.surrender = 0
 
             # 若己方认输
             if red.surrender == 1:
                 msg.create_mess(2, Red_chess_init)
                 red.send_info(msg)
+                red.tie = 0
                 red.surrender = 0
 
             # 绘制棋子
