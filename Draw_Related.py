@@ -73,6 +73,8 @@ def pos_to_grid(co_x, co_y):
 class DrawType:
     # 初始化函数
     def __init__(self):
+        self.times = 0
+
         # 红方或黑方标志，0表示红方，1表示黑方
         self.side = 0
         # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，3表示结束界面
@@ -165,6 +167,36 @@ class DrawType:
         # 认输标识
         self.surrender = 0
 
+        # 将军提示
+        self.warn_image = pygame.image.load('images/将军.png')
+        self.warn_pos = (200, 250)
+        # 将军标识
+        self.warn = 0
+
+        # 音乐部分
+        # 背景音乐
+        pygame.mixer.music.load('Sounds/bgm.ogg')
+        pygame.mixer.music.set_volume(0.05)
+        pygame.mixer.music.play()
+
+        # 开始游戏音乐
+        self.start_music = pygame.mixer.Sound('Sounds/开始游戏.ogg')
+        self.start_music.set_volume(0.1)
+        # 结束游戏音乐
+        self.end_music = pygame.mixer.Sound('Sounds/结束游戏.ogg')
+        # 将军
+        self.warn_music = pygame.mixer.Sound('Sounds/将军.ogg')
+        self.warn_music.set_volume(0.5)
+        # 落子
+        self.move_music = pygame.mixer.Sound('Sounds/落子.ogg')
+        self.move_music.set_volume(0.7)
+        # 选中
+        self.choice_music = pygame.mixer.Sound('Sounds/象棋选择.ogg')
+        self.choice_music.set_volume(0.7)
+        # 按钮
+        self.button_music = pygame.mixer.Sound('Sounds/按钮.ogg')
+        self.button_music.set_volume(0.3)
+
     # 背景绘制
     def bg_draw(self):
         # 背景绘制
@@ -218,6 +250,7 @@ class DrawType:
             # 判断是否点击‘启动游戏’按钮
             if (self.start_button1[0] < mouse_pos[0] < self.start_button2[0]) and (
                     self.start_button1[1] < mouse_pos[1] < self.start_button2[1]):
+                self.button_music.play()
                 # 修改标识符
                 self.tag = 1
                 self.start_or_join = 1
@@ -225,7 +258,9 @@ class DrawType:
             # 判断是否点击‘加入游戏’按钮
             if (self.join_button1[0] < mouse_pos[0] < self.join_button2[0]) and (
                     self.join_button1[1] < mouse_pos[1] < self.join_button2[1]):
+                self.button_music.play()
                 # 修改标识符
+                self.start_music.play()
                 self.start_or_join = 2
                 self.tag = 2
                 return
@@ -235,6 +270,7 @@ class DrawType:
             # 判断是否点击‘返回’按钮
             if (self.return_button1[0] < mouse_pos[0] < self.return_button2[0]) and (
                     self.return_button1[1] < mouse_pos[1] < self.return_button2[1]):
+                self.button_music.play()
                 # 修改标识符
                 self.tag = 0
                 return
@@ -247,6 +283,7 @@ class DrawType:
             # 若点击'和棋'按钮
             if (self.tie_button1[0] < mouse_pos[0] < self.tie_button2[0]) and (
                     self.tie_button1[1] < mouse_pos[1] < self.tie_button2[1]):
+                self.button_music.play()
                 if self.tie == 2:
                     self.tie = 4
                 else:
@@ -255,6 +292,7 @@ class DrawType:
             # 若点击'认输'按钮
             elif (self.surrender_button1[0] < mouse_pos[0] < self.surrender_button2[0]) and (
                     self.surrender_button1[1] < mouse_pos[1] < self.surrender_button2[1]):
+                self.button_music.play()
                 self.surrender = 1
 
             # 若未轮到本方
@@ -284,6 +322,7 @@ class DrawType:
 
             # 若为己方棋子，且未选中，且轮到本方下棋则显示选中
             elif mouse_pos[0] <= 577:
+                self.choice_music.play()
                 self.choice = grid_to_pos(self.cur[0], self.cur[1])
                 self.choice_ready = self.cur  # 用于保存已经选择的棋子信息
                 self.image_selected = True  # 是否选中图片的标志
@@ -293,6 +332,7 @@ class DrawType:
             # 判断是否点击’再来一局‘按钮
             if (self.red_return1[0] < mouse_pos[0] < self.red_return2[0]) and (
                     self.red_return1[1] < mouse_pos[1] < self.red_return2[1]):
+                self.button_music.play()
                 # 修改标识符
                 self.tag = 2
                 # 还原棋盘
@@ -302,13 +342,17 @@ class DrawType:
                 else:
                     self.chess_info = Black_chess_init
                     self.able_move = 0
+                self.warn = 0
                 self.choice = (-1, -1)
+                self.tie = 0
+                self.surrender = 0
                 self.image_selected = False
                 return
 
             # 判断是否点击'退出'按钮
             if (self.red_exit1[0] < mouse_pos[0] < self.red_exit2[0]) and (
                     self.red_exit1[1] < mouse_pos[1] < self.red_exit2[1]):
+                self.button_music.play()
                 pygame.quit()
                 sys.exit()
 
@@ -340,10 +384,21 @@ class DrawType:
 
     # 绘制额外图片
     def draw_picture(self):
+        # 显示‘对方发起和棋’
         if self.tie == 2:
             self.screen.blit(self.tie_accept_image, self.tie_pos)
+        # 显示‘已请求和棋’
         if self.tie == 3:
             self.screen.blit(self.tie_acquire_image, self.tie_pos)
+        # 显示‘将军’提醒
+        if self.warn == 1:
+            # 显示将军后，延时一小会就清除
+            self.times += 1
+            if self.times == 120:
+                self.warn = 0
+                self.times = 0
+            # 绘制'将'
+            self.screen.blit(self.warn_image, self.warn_pos)
 
     # 移动棋子到对应位置
     def move_chess(self):
@@ -368,6 +423,14 @@ class DrawType:
             chess = self.chess_info[self.choice_ready[0]][self.choice_ready[1]]
             self.chess_info[self.choice_ready[0]][self.choice_ready[1]] = 0
             self.chess_info[self.cur[0]][self.cur[1]] = chess
+
+            self.move_music.play()
+
+            threaten_lst = Chess.where_can_move(self.chess_info, self.cur)
+            for grid in threaten_lst:
+                if self.chess_info[grid[0]][grid[1]] == 5 or self.chess_info[grid[0]][grid[1]] == 15:
+                    self.warn = 1
+                    self.warn_music.play()
 
             # 走完后，当前无选中位置
             self.change = 1

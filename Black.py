@@ -4,9 +4,9 @@ import threading
 import pickle
 
 # 当黑方发起游戏的ip地址
-ip_black_server = ('127.0.0.1', 5000)  # 若联机，更改此处为本机ip及端口
+ip_black_server = ('127.0.0.1', 8000)  # 若联机，更改此处为本机ip及端口
 # 当黑方加入游戏需要连接的ip地址
-ip_black_client = ('10.17.52.206', 8000)  # 若联机，更改此处为对方主机ip及端口
+ip_black_client = ('127.0.0.1', 5000)  # 若联机，更改此处为对方主机ip及端口
 # 传输的尺寸限制
 buf_size = 512
 # 黑方初始棋子位置
@@ -27,7 +27,9 @@ Black_chess_init = [
 # 用于传送数据的类
 class Mess:
     def __init__(self):
+        # 标记本条信息的属性，0表示普通传输，1表示游戏结束，2表示认输信号，3表示请求和棋信号，4表示回应和棋信号
         self.tg = 0
+        # 棋子信息矩阵
         self.chess_text = [[]]
 
     # 创建数据传输的类，需要本方的移动信息
@@ -106,6 +108,8 @@ class BlackSide(Draw_Related.DrawType):
         self.able_move = 0
         # 连接建立，进入游戏界面
         self.tag = 2
+        # 播放开始音效
+        self.start_music.play()
 
         print('Start')
         # 绑定receive_thread线程与receiver函数
@@ -157,9 +161,11 @@ class BlackSide(Draw_Related.DrawType):
 
         # 收到对方接受和棋的信号
         if msg.tg == 4:
-            self.tie = 0
-            self.surrender = 0
             self.tag = 32
+
+        # 收到对方将军的信号
+        if msg.tg == 5:
+            self.warn = 1
 
         rcv_data = msg.chess_text
         print(rcv_data)
@@ -183,7 +189,6 @@ def main():
 
     # 主循环
     while True:
-
         # 每次事件检测前的tag
         ps_tag = black.tag
 
@@ -210,6 +215,8 @@ def main():
         # 游戏结束瞬间
         if ps_tag == 2 and black.tag == 31:
             msg.create_mess(1, Black_chess_init)
+            # 播放结束音效
+            black.end_music.play()
             # 传输棋子信息矩阵
             black.send_info(msg)
         # 游戏重启
@@ -217,8 +224,7 @@ def main():
             msg.create_mess(0, Black_chess_init)
             # 传输棋子信息矩阵
             black.send_info(msg)
-            black.able_move = 0
-        # 游戏其他时间
+        # 游戏其他时间www
         else:
             msg.create_mess(0, black.chess_info)
 
@@ -241,15 +247,16 @@ def main():
                 msg.create_mess(4, Black_chess_init)
                 black.send_info(msg)
                 black.tag = 32
-                black.surrender = 0
-                black.tie = 0
 
             # 若己方认输
             if black.surrender == 1:
                 msg.create_mess(2, Black_chess_init)
                 black.send_info(msg)
-                black.surrender = 0
-                black.tie = 0
+
+            # 若将军
+            if black.warn == 1 and black.times == 0:
+                msg.create_mess(5, black.chess_info)
+                black.send_info(msg)
 
             # 绘制棋子
             black.draw_chess()
