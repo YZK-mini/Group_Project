@@ -47,6 +47,10 @@ def pos_to_grid(co_x, co_y):
 class DrawType:
     # 初始化函数
     def __init__(self):
+        # 帧率
+        self.FPS = 60
+
+        # 运行次数统计
         self.times = 0
 
         # 红方初始棋子位置
@@ -93,6 +97,8 @@ class DrawType:
         self.able_move = 0
         # 选中棋子图片标志
         self.image_selected = None
+        # 失败标识
+        self.lose = 0
 
         # 初始化pygame
         pygame.init()
@@ -177,7 +183,7 @@ class DrawType:
         # 音乐部分
         # 背景音乐
         pygame.mixer.music.load('Sounds/bgm.ogg')
-        pygame.mixer.music.set_volume(0.2)
+        pygame.mixer.music.set_volume(0.4)
         pygame.mixer.music.play()
         pygame.mixer.music.rewind()
 
@@ -240,7 +246,6 @@ class DrawType:
                 if mouse_presses[0]:
                     # 调用鼠标事件处理函数，传入鼠标坐标
                     self.mouse_solve(pygame.mouse.get_pos())
-                    return self.tag
 
         return self.tag
 
@@ -249,6 +254,7 @@ class DrawType:
 
         # 若处于开始界面
         if self.tag == 0:
+
             # 判断是否点击‘启动游戏’按钮
             if (self.start_button1[0] < mouse_pos[0] < self.start_button2[0]) and (
                     self.start_button1[1] < mouse_pos[1] < self.start_button2[1]):
@@ -257,6 +263,7 @@ class DrawType:
                 self.tag = 1
                 self.start_or_join = 1
                 return
+
             # 判断是否点击‘加入游戏’按钮
             if (self.join_button1[0] < mouse_pos[0] < self.join_button2[0]) and (
                     self.join_button1[1] < mouse_pos[1] < self.join_button2[1]):
@@ -269,6 +276,7 @@ class DrawType:
 
         # 若处于等待界面
         if self.tag == 1:
+
             # 判断是否点击‘返回’按钮
             if (self.return_button1[0] < mouse_pos[0] < self.return_button2[0]) and (
                     self.return_button1[1] < mouse_pos[1] < self.return_button2[1]):
@@ -290,17 +298,20 @@ class DrawType:
                     self.tie = 4
                 else:
                     self.tie = 1
+                return
 
             # 若点击'认输'按钮
             elif (self.surrender_button1[0] < mouse_pos[0] < self.surrender_button2[0]) and (
                     self.surrender_button1[1] < mouse_pos[1] < self.surrender_button2[1]):
                 self.button_music.play()
                 self.surrender = 1
+                return
 
             # 若未轮到本方
             elif self.able_move == 0:
                 print('请等待对方下棋')
                 pass
+                return
 
             # 若为空处
             elif self.chess_info[self.cur[0]][self.cur[1]] == 0:
@@ -311,9 +322,11 @@ class DrawType:
                 else:
                     print('空白处')
                     pass
+                return
 
             # 若选中对方棋子
-            elif self.side != self.chess_info[self.cur[0]][self.cur[1]] // 10:
+            elif (self.side != self.chess_info[self.cur[0]][self.cur[1]] // 10 and
+                  self.chess_info[self.cur[0]][self.cur[1]] != 0):
                 # 若已选中本方棋子，则移动吞并
                 if self.image_selected:
                     self.move_chess()
@@ -321,22 +334,25 @@ class DrawType:
                 else:
                     print('不是你的棋子')
                     pass
+                return
 
             # 若为己方棋子，且未选中，且轮到本方下棋则显示选中
-            elif mouse_pos[0] <= 577:
-                self.choice_music.play()
-                self.choice = grid_to_pos(self.cur[0], self.cur[1])
-                self.choice_ready = self.cur  # 用于保存已经选择的棋子信息
-                self.image_selected = True  # 是否选中图片的标志
+            else:
+                if mouse_pos[0] <= 577:
+                    self.choice_music.play()
+                    self.choice = grid_to_pos(self.cur[0], self.cur[1])
+                    self.choice_ready = self.cur  # 用于保存已经选择的棋子信息
+                    self.image_selected = True  # 是否选中图片的标志
+                return
 
         # 若处于结束界面
         if self.tag == 30 or self.tag == 31 or self.tag == 32:
+
             # 判断是否点击’再来一局‘按钮
             if (self.red_return1[0] < mouse_pos[0] < self.red_return2[0]) and (
                     self.red_return1[1] < mouse_pos[1] < self.red_return2[1]):
                 self.button_music.play()
-                # 修改标识符
-                self.tag = 2
+
                 # 还原棋盘
                 if self.side == 0:
                     self.chess_info = self.Red_chess_init
@@ -345,11 +361,15 @@ class DrawType:
                     self.chess_info = self.Black_chess_init
                     self.able_move = 0
 
+                # 修改标识符
+                self.tag = 2
                 self.choice = (-1, -1)
                 self.warn = 0
                 self.tie = 0
                 self.surrender = 0
+                self.lose = 0
                 self.image_selected = False
+
                 return
 
             # 判断是否点击'退出'按钮
@@ -358,50 +378,6 @@ class DrawType:
                 self.button_music.play()
                 pygame.quit()
                 sys.exit()
-
-    # 绘制棋子
-    def draw_chess(self):
-        # 根据棋子信息矩阵绘制每一个棋子
-        for i in range(10):
-            for j in range(9):
-                # 该位置为空，跳过
-                if self.chess_info[i][j] == 0:
-                    continue
-                # 该位置不为空，在chess_number字典中查找该棋子对应图片的文件名，并绘制
-                else:
-                    temp_image = pygame.image.load(chess_number.get(self.chess_info[i][j]))
-                    self.screen.blit(temp_image, grid_to_pos(i, j))
-        # 正确选择的位置出现蓝色四方形框
-        if self.choice != (-1, -1):
-            self.screen.blit(self.block_image, self.choice)
-
-        if self.image_selected:
-            # 已选中的棋子位置
-            cur_pos = (self.choice_ready[0], self.choice_ready[1])
-            # 可以移动的位置列表
-            self.can_moves = Chess.where_can_move(self.chess_info, cur_pos)
-            # 绘制移动提示
-            for grid in self.can_moves:
-                position = grid_to_pos(grid[0], grid[1])
-                self.screen.blit(self.tip_image, (position[0] + 17.5, position[1] + 17.5))
-
-    # 绘制额外图片
-    def draw_picture(self):
-        # 显示‘对方发起和棋’
-        if self.tie == 2:
-            self.screen.blit(self.tie_accept_image, self.tie_pos)
-        # 显示‘已请求和棋’
-        if self.tie == 3:
-            self.screen.blit(self.tie_acquire_image, self.tie_pos)
-        # 显示‘将军’提醒
-        if self.warn == 1:
-            # 显示将军后，延时一小会就清除
-            self.times += 1
-            if self.times == 120:
-                self.warn = 0
-                self.times = 0
-            # 绘制'将'
-            self.screen.blit(self.warn_image, self.warn_pos)
 
     # 移动棋子到对应位置
     def move_chess(self):
@@ -418,6 +394,7 @@ class DrawType:
             if self.chess_info[next_pos[0]][next_pos[1]] == 5:
                 print('帅已死')
                 self.tag = 31
+
             if self.chess_info[next_pos[0]][next_pos[1]] == 15:
                 print('将已死')
                 self.tag = 30
@@ -446,6 +423,54 @@ class DrawType:
             # 想要移动的位置不在可以移动的位置列表内，则无反应
             print('不能移动到此处')
             pass
+
+    # 绘制棋子
+    def draw_chess(self):
+        # 根据棋子信息矩阵绘制每一个棋子
+        for i in range(10):
+            for j in range(9):
+                # 该位置为空，跳过
+                if self.chess_info[i][j] == 0:
+                    continue
+                # 该位置不为空，在chess_number字典中查找该棋子对应图片的文件名，并绘制
+                else:
+                    temp_image = pygame.image.load(chess_number.get(self.chess_info[i][j]))
+                    self.screen.blit(temp_image, grid_to_pos(i, j))
+
+    # 绘制额外图片
+    def draw_picture(self):
+
+        # 正确选择的位置出现蓝色四方形框
+        if self.choice != (-1, -1):
+            self.screen.blit(self.block_image, self.choice)
+
+        # 若已选中
+        if self.image_selected:
+            # 已选中的棋子位置
+            cur_pos = (self.choice_ready[0], self.choice_ready[1])
+            # 可以移动的位置列表
+            self.can_moves = Chess.where_can_move(self.chess_info, cur_pos)
+            # 绘制移动提示
+            for grid in self.can_moves:
+                position = grid_to_pos(grid[0], grid[1])
+                self.screen.blit(self.tip_image, (position[0] + 17.5, position[1] + 17.5))
+
+        # 显示‘对方发起和棋’
+        if self.tie == 2:
+            self.screen.blit(self.tie_accept_image, self.tie_pos)
+        # 显示‘已请求和棋’
+        if self.tie == 3:
+            self.screen.blit(self.tie_acquire_image, self.tie_pos)
+
+        # 显示‘将军’提醒
+        if self.warn == 1:
+            # 显示将军后，延时一秒就清除
+            self.times += 1
+            if self.times == 60:
+                self.warn = 0
+                self.times = 0
+            # 绘制'将'
+            self.screen.blit(self.warn_image, self.warn_pos)
 
     # 更新窗口内容
     @staticmethod

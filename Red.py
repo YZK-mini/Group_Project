@@ -1,6 +1,4 @@
-from socket import *
 import Connect_and_Side
-import threading
 
 # 当红方发起游戏的ip地址
 ip_red_server = ('127.0.0.1', 5000)  # 若联机，更改此处为本机ip及端口
@@ -18,21 +16,6 @@ class RedSide(Connect_and_Side.Side):
 
         # 重新赋值要连接的ip和端口
         self.ip_client = ip_red_client
-
-        # 创建服务器接口
-        self.s = socket(AF_INET, SOCK_STREAM)
-        self.conn = socket()
-
-        # 定义wait_thread线程
-        self.wait_thread = threading.Thread()
-        # 创建客户端接口
-        self.c = socket(AF_INET, SOCK_STREAM)
-
-        # 定义receive线程
-        self.receive_thread = threading.Thread()
-
-        # 标记自身是服务端还是客户端， 0表示客户端， 1表示服务端
-        self.s_or_c = 0
 
         # 绑定服务器接口
         self.s.bind(ip_red_server)
@@ -52,7 +35,7 @@ def main():
         ps_tag = red.tag
 
         # 窗口刷新率设为60
-        red.clock.tick(60)
+        red.clock.tick(red.FPS)
 
         # 操作信息检测
         red.tag = red.check_movement()
