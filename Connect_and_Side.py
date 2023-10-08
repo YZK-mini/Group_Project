@@ -6,6 +6,7 @@ import threading
 
 # 颜色方类
 class Side(Draw_and_Sound.DrawType):
+
     def __init__(self):
         super(Side, self).__init__()
         # 连接的ip地址和端口
@@ -28,7 +29,7 @@ class Side(Draw_and_Sound.DrawType):
         self.s_or_c = 0
 
         # 传输大小
-        self.buf_size = 512
+        self.buf_size = 1024
 
     # 用于传送数据的类
     class Mess:
@@ -37,7 +38,7 @@ class Side(Draw_and_Sound.DrawType):
             # 标记本条信息的属性，0表示普通传输，1表示游戏结束，2表示认输信号，3表示请求和棋信号，4表示回应和棋信号
             self.tg = 0
             # 棋子信息矩阵
-            self.chess_text = [[]]
+            self.chess_text = None
 
         # 创建数据传输的类，需要本方的移动信息
         def create_mess(self, tag, temp_chess_info):
@@ -74,9 +75,9 @@ class Side(Draw_and_Sound.DrawType):
 
             # 初始化棋子位置
             if self.side == 0:
-                self.chess_info = self.Red_chess_init
+                self.chess_info = self.red_chess_init()
             else:
-                self.chess_info = self.Black_chess_init
+                self.chess_info = self.black_chess_init()
 
             # 红方先行,黑方后行
             if self.side == 0:
@@ -104,9 +105,9 @@ class Side(Draw_and_Sound.DrawType):
 
         # 连接建立，初始化棋子位置
         if self.side == 0:
-            self.chess_info = self.Red_chess_init
+            self.chess_info = self.red_chess_init()
         else:
-            self.chess_info = self.Black_chess_init
+            self.chess_info = self.black_chess_init()
 
         # 红方先行,黑方后行
         if self.side == 0:
@@ -127,6 +128,7 @@ class Side(Draw_and_Sound.DrawType):
 
     # 发送
     def send_info(self, msg):
+        print(msg.tg, msg.chess_text)
         if self.start_or_join == 1:
             self.conn.send(pickle.dumps(msg))
         else:
@@ -135,7 +137,6 @@ class Side(Draw_and_Sound.DrawType):
     # 接收对方发来的棋子信息矩阵
     def receiver(self):
         while True:
-            # 接收信息存入rcv_data
             if self.s_or_c:
                 try:
                     msg_s = pickle.loads(self.conn.recv(self.buf_size))
@@ -164,59 +165,52 @@ class Side(Draw_and_Sound.DrawType):
 
         # 收到对方认输信号
         elif msg.tg == 2:
+
             temp_msg = Side.Mess()
+
             if self.side == 0:
                 self.tag = 30
-                temp_msg.create_mess(1, self.Red_chess_init)
             else:
                 self.tag = 31
-                temp_msg.create_mess(1, self.Black_chess_init)
+
+            temp_msg.create_mess(1, self.chess_info)
             self.send_info(temp_msg)
+
+            return
 
         # 收到请求和棋的信号
         elif msg.tg == 3:
             self.tie = 2
+            return
 
         # 收到对方接受和棋的信号
         elif msg.tg == 4:
             self.tag = 32
+            return
 
         # 收到对方将军的信号
         elif msg.tg == 5:
             self.warn = 1
             # 将军提示音
             self.warn_music.play()
+            return
 
-        # 游戏重启信号
-        if msg.tg == 6:
-            if self.side == 0:
-                self.chess_info = self.Red_chess_init
-            else:
-                self.chess_info = self.Black_chess_init
+        rcv_data = msg.chess_text
 
-            temp_msg = Side.Mess()
-            if self.side == 0:
-                temp_msg.create_mess(0, self.Red_chess_init)
-            else:
-                temp_msg.create_mess(0, self.Black_chess_init)
+        # 换方需对矩阵进行180度旋转
+        for i in range(5):
+            for j in range(9):
+                temp = rcv_data[i][j]
+                rcv_data[i][j] = rcv_data[9 - i][8 - j]
+                rcv_data[9 - i][8 - j] = temp
 
-            self.send_info(temp_msg)
+        # 如果接收到的棋盘与已有棋盘不同，则更新棋盘
+        if self.chess_info != rcv_data and self.tag == 2:
+            self.chess_info = rcv_data
+            # 轮到己方行动
+            self.able_move = 1
 
-        else:
-            rcv_data = msg.chess_text
-
-            # 换方需对矩阵进行180度旋转
-            for i in range(5):
-                for j in range(9):
-                    temp = rcv_data[i][j]
-                    rcv_data[i][j] = rcv_data[9 - i][8 - j]
-                    rcv_data[9 - i][8 - j] = temp
-
-            # 如果接收到的棋盘与已有棋盘不同，则更新棋盘
-            if self.chess_info != rcv_data and self.tag == 2:
-                self.chess_info = rcv_data
-                # 轮到己方行动
-                self.able_move = 1
+        return
 
     # 交互和绘制相关
     def interact_and_draw(self, ps_tag):
@@ -226,34 +220,27 @@ class Side(Draw_and_Sound.DrawType):
         # 游戏结束瞬间
         if ps_tag == 2 and (self.tag == 30 or self.tag == 31 or self.tag == 32) and self.lose != 1:
 
-            # 根据颜色发送结束信息
-            if self.side == 0:
-                msg.create_mess(1, self.Red_chess_init)
-            else:
-                msg.create_mess(1, self.Black_chess_init)
+            # 发送结束信息
+            msg.create_mess(1, self.chess_info)
 
             # 播放结束音效
             self.end_music.play()
             # 传输棋子信息矩阵
+            # 不为和棋情况才发送击败信息
             if self.tie == 0:
                 self.send_info(msg)
 
         # 游戏重启
         elif (ps_tag == 30 or ps_tag == 31 or ps_tag == 32) and self.tag == 2:
-
-            # 重启信息
+            # 还原棋盘
             if self.side == 0:
-                msg.create_mess(6, self.Red_chess_init)
+                self.chess_info = self.red_chess_init()
+                self.able_move = 1
             else:
-                msg.create_mess(6, self.Black_chess_init)
+                self.chess_info = self.black_chess_init()
+                self.able_move = 0
 
-            if self.side == 0:
-                self.chess_info = self.Red_chess_init
-            else:
-                self.chess_info = self.Black_chess_init
-
-            # 传输棋子信息矩阵
-            self.send_info(msg)
+            return
 
         # 游戏其他时间
         else:
@@ -275,19 +262,13 @@ class Side(Draw_and_Sound.DrawType):
 
             # 若己方接受和棋
             if self.tie == 4:
-                if self.side == 0:
-                    msg.create_mess(4, self.Red_chess_init)
-                else:
-                    msg.create_mess(4, self.Black_chess_init)
+                msg.create_mess(4, self.chess_info)
                 self.send_info(msg)
                 self.tag = 32
 
             # 若己方认输
             if self.surrender == 1:
-                if self.side == 0:
-                    msg.create_mess(2, self.Red_chess_init)
-                else:
-                    msg.create_mess(2, self.Black_chess_init)
+                msg.create_mess(2, self.chess_info)
                 self.send_info(msg)
 
             # 若将军
@@ -300,3 +281,35 @@ class Side(Draw_and_Sound.DrawType):
 
             # 绘制额外图片
             self.draw_picture()
+
+    # 返回红方初始棋子位置
+    @staticmethod
+    def red_chess_init():
+        return [
+            [11, 12, 13, 14, 15, 14, 13, 12, 11],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 16, 0, 0, 0, 0, 0, 16, 0],
+            [17, 0, 17, 0, 17, 0, 17, 0, 17],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [7, 0, 7, 0, 7, 0, 7, 0, 7],
+            [0, 6, 0, 0, 0, 0, 0, 6, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 2, 3, 4, 5, 4, 3, 2, 1],
+        ]
+
+    # 返回黑方初始棋子位置
+    @staticmethod
+    def black_chess_init():
+        return [
+            [1, 2, 3, 4, 5, 4, 3, 2, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 6, 0, 0, 0, 0, 0, 6, 0],
+            [7, 0, 7, 0, 7, 0, 7, 0, 7],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [17, 0, 17, 0, 17, 0, 17, 0, 17],
+            [0, 16, 0, 0, 0, 0, 0, 16, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [11, 12, 13, 14, 15, 14, 13, 12, 11],
+        ]

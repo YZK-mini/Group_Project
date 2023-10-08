@@ -27,7 +27,6 @@ class RedSide(Connect_and_Side.Side):
 def main():
     # 初始化
     red = RedSide()
-    red.chess_info = red.Red_chess_init
 
     # 主循环
     while True:

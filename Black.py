@@ -27,7 +27,6 @@ class BlackSide(Connect_and_Side.Side):
 def main():
     # 初始化
     black = BlackSide()
-    black.chess_info = black.Black_chess_init
 
     # 主循环
     while True:

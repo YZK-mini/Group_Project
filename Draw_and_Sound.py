@@ -48,37 +48,10 @@ class DrawType:
     # 初始化函数
     def __init__(self):
         # 帧率
-        self.FPS = 60
+        self.FPS = 90
 
         # 运行次数统计
         self.times = 0
-
-        # 红方初始棋子位置
-        self.Red_chess_init = [
-            [11, 12, 13, 14, 15, 14, 13, 12, 11],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 16, 0, 0, 0, 0, 0, 16, 0],
-            [17, 0, 17, 0, 17, 0, 17, 0, 17],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [7, 0, 7, 0, 7, 0, 7, 0, 7],
-            [0, 6, 0, 0, 0, 0, 0, 6, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 2, 3, 4, 5, 4, 3, 2, 1],
-        ]
-        # 黑方初始棋子位置
-        self.Black_chess_init = [
-            [1, 2, 3, 4, 5, 4, 3, 2, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 6, 0, 0, 0, 0, 0, 6, 0],
-            [7, 0, 7, 0, 7, 0, 7, 0, 7],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [17, 0, 17, 0, 17, 0, 17, 0, 17],
-            [0, 16, 0, 0, 0, 0, 0, 16, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [11, 12, 13, 14, 15, 14, 13, 12, 11],
-        ]
 
         # 红方或黑方标志，0表示红方，1表示黑方
         self.side = 0
@@ -341,8 +314,10 @@ class DrawType:
                 if mouse_pos[0] <= 577:
                     self.choice_music.play()
                     self.choice = grid_to_pos(self.cur[0], self.cur[1])
-                    self.choice_ready = self.cur  # 用于保存已经选择的棋子信息
-                    self.image_selected = True  # 是否选中图片的标志
+                    # 用于保存已经选择的棋子信息
+                    self.choice_ready = self.cur
+                    # 是否选中图片的标志
+                    self.image_selected = True
                 return
 
         # 若处于结束界面
@@ -352,14 +327,6 @@ class DrawType:
             if (self.red_return1[0] < mouse_pos[0] < self.red_return2[0]) and (
                     self.red_return1[1] < mouse_pos[1] < self.red_return2[1]):
                 self.button_music.play()
-
-                # 还原棋盘
-                if self.side == 0:
-                    self.chess_info = self.Red_chess_init
-                    self.able_move = 1
-                else:
-                    self.chess_info = self.Black_chess_init
-                    self.able_move = 0
 
                 # 修改标识符
                 self.tag = 2
@@ -394,10 +361,12 @@ class DrawType:
             if self.chess_info[next_pos[0]][next_pos[1]] == 5:
                 print('帅已死')
                 self.tag = 31
+                return
 
             if self.chess_info[next_pos[0]][next_pos[1]] == 15:
                 print('将已死')
                 self.tag = 30
+                return
 
             # 若想要移动的位置在可以移动的位置列表内，则执行吃子或移动
             chess = self.chess_info[self.choice_ready[0]][self.choice_ready[1]]
