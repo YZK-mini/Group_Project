@@ -207,6 +207,7 @@ class Side(Draw_and_Sound.DrawType):
         # 如果接收到的棋盘与已有棋盘不同，则更新棋盘
         if self.chess_info != rcv_data and self.tag == 2:
             self.chess_info = rcv_data
+            self.move_music.play()
             # 轮到己方行动
             self.able_move = 1
 

@@ -48,7 +48,7 @@ class DrawType:
     # 初始化函数
     def __init__(self):
         # 帧率
-        self.FPS = 90
+        self.FPS = 60
 
         # 运行次数统计
         self.times = 0
@@ -162,15 +162,16 @@ class DrawType:
 
         # 开始游戏音乐
         self.start_music = pygame.mixer.Sound('Sounds/开始游戏.ogg')
-        self.start_music.set_volume(0.3)
+        self.start_music.set_volume(0.6)
         # 结束游戏音乐
         self.end_music = pygame.mixer.Sound('Sounds/结束游戏.ogg')
+        self.end_music.set_volume(0.7)
         # 将军
         self.warn_music = pygame.mixer.Sound('Sounds/将军.ogg')
         self.warn_music.set_volume(0.5)
         # 落子
         self.move_music = pygame.mixer.Sound('Sounds/落子.ogg')
-        self.move_music.set_volume(0.7)
+        self.move_music.set_volume(0.8)
         # 选中
         self.choice_music = pygame.mixer.Sound('Sounds/象棋选择.ogg')
         self.choice_music.set_volume(0.7)
