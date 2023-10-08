@@ -83,7 +83,7 @@ class DrawType:
         icon = pygame.image.load("images/图标.png")
         pygame.display.set_icon(icon)
         # 创建窗口
-        self.screen = pygame.display.set_mode((521, 640))
+        self.screen = pygame.display.set_mode((521, 700))
 
         # 背景图片
         self.start_img = pygame.image.load('images/开始界面.png')
