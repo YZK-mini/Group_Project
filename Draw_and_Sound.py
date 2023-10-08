@@ -47,9 +47,7 @@ def pos_to_grid(co_x, co_y):
 class DrawType:
     # 初始化函数
     def __init__(self):
-        # 帧率
-        self.FPS = 60
-
+        # 逻辑相关
         # 运行次数统计
         self.times = 0
 
@@ -70,13 +68,35 @@ class DrawType:
         self.able_move = 0
         # 选中棋子图片标志
         self.image_selected = None
+
+        # 当前选中棋子可移动位置
+        self.can_moves = []
+
+        # 棋子初始坐标
+        self.chess_info = None
+
+        # 棋子移动标识
+        self.change = 0
+        # 求和标识
+        self.tie = 0
         # 失败标识
         self.lose = 0
+        # 剩余悔棋次数,每局每方两次机会
+        self.withdraw_times = 2
+        # 认输标识
+        self.surrender = 0
+        # 将军标识
+        self.warn = 0
 
+        # 画面相关
         # 初始化pygame
         pygame.init()
+
+        # 帧率
+        self.FPS = 60
         # 控制帧率
         self.clock = pygame.time.Clock()
+
         # 修改游戏窗口标题
         pygame.display.set_caption('中国象棋')
         # 修改游戏窗口图标
@@ -107,6 +127,19 @@ class DrawType:
         self.tie_button1 = (243, 586)
         self.tie_button2 = (370, 633)
         # 按钮‘和棋’左上（243，586），右下（370，633）
+        self.withdraw_button1 = (242, 644)
+        self.withdraw_button2 = (370, 694)
+        # 按钮‘悔棋’左上（242，644），右下（370，694）
+        self.time0_image = pygame.image.load('images/次数0.png')
+        self.time1_image = pygame.image.load('images/次数1.png')
+        self.time2_image = pygame.image.load('images/次数2.png')
+        self.time_image_pos = (444, 658)
+        # 悔棋次数图片及坐标
+
+        self.red_side_image = pygame.image.load('images/红方.png')
+        self.black_side_image = pygame.image.load('images/黑方.png')
+        self.side_image_pos = (113, 647)
+        # 当前轮转显示，图片及坐标
 
         # 结束界面图片
         self.end_img = None
@@ -128,30 +161,14 @@ class DrawType:
         # 走棋提示
         self.tip_image = pygame.image.load('images/提示.png')
 
-        # 当前选中棋子可移动位置
-        self.can_moves = []
-
-        # 棋子初始坐标
-        self.chess_info = None
-
-        # 棋子移动标识
-        self.change = 0
-
-        # 求和标识
-        self.tie = 0
         # 和棋提示
         self.tie_accept_image = pygame.image.load('images/接受求和提示.png')
         self.tie_acquire_image = pygame.image.load('images/发出求和提示.png')
         self.tie_pos = (18, 590)
 
-        # 认输标识
-        self.surrender = 0
-
         # 将军提示
         self.warn_image = pygame.image.load('images/将军.png')
         self.warn_pos = (200, 250)
-        # 将军标识
-        self.warn = 0
 
         # 音乐部分
         # 背景音乐
@@ -336,6 +353,7 @@ class DrawType:
                 self.tie = 0
                 self.surrender = 0
                 self.lose = 0
+                self.withdraw_times = 2
                 self.image_selected = False
 
                 return
@@ -441,6 +459,26 @@ class DrawType:
                 self.times = 0
             # 绘制'将'
             self.screen.blit(self.warn_image, self.warn_pos)
+
+        # 显示剩余悔棋次数
+        if self.withdraw_times == 2:
+            self.screen.blit(self.time2_image, self.time_image_pos)
+        elif self.withdraw_times == 1:
+            self.screen.blit(self.time1_image, self.time_image_pos)
+        elif self.withdraw_times == 0:
+            self.screen.blit(self.time0_image, self.time_image_pos)
+
+        # 显示当前下棋方
+        if self.side == 0:
+            if self.able_move == 1:
+                self.screen.blit(self.red_side_image, self.side_image_pos)
+            else:
+                self.screen.blit(self.black_side_image, self.side_image_pos)
+        else:
+            if self.able_move == 0:
+                self.screen.blit(self.red_side_image, self.side_image_pos)
+            else:
+                self.screen.blit(self.black_side_image, self.side_image_pos)
 
     # 更新窗口内容
     @staticmethod
