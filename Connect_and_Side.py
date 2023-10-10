@@ -227,9 +227,7 @@ class Side(Draw_and_Sound.DrawType):
             # 播放结束音效
             self.end_music.play()
             # 传输棋子信息矩阵
-            # 不为和棋情况才发送击败信息
-            if self.tie == 0:
-                self.send_info(msg)
+            self.send_info(msg)
 
         # 游戏重启
         elif (ps_tag == 30 or ps_tag == 31 or ps_tag == 32) and self.tag == 2:
