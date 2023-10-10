@@ -277,6 +277,9 @@ class Side(Draw_and_Sound.DrawType):
                 msg.create_mess(5, self.chess_info)
                 self.send_info(msg)
 
+            if self.undo == 1:
+                pass
+
             # 绘制棋子
             self.draw_chess()
 

@@ -51,6 +51,9 @@ class DrawType:
         # 运行次数统计
         self.times = 0
 
+        # 悔棋判断
+        self.undo = 0
+
         # 红方或黑方标志，0表示红方，1表示黑方
         self.side = 0
         # 游戏进行状态标识，0表示开始界面，1表示等待界面，2表示游戏界面，3表示结束界面
@@ -297,6 +300,13 @@ class DrawType:
                 self.button_music.play()
                 self.surrender = 1
                 return
+            # 点击悔棋按钮
+            elif (self.withdraw_button1[0] < mouse_pos[0] < self.withdraw_button2[0]) and (
+                    self.withdraw_button1[1] < mouse_pos[1] < self.withdraw_button2[1]):
+                self.withdraw_times -= 1
+                self.undo = 1
+                if self.withdraw_times < 0:
+                    self.withdraw_times = 0
 
             # 若未轮到本方
             elif self.able_move == 0:
