@@ -2,6 +2,7 @@ import math
 import pygame
 import sys
 import Chess
+from copy import deepcopy
 
 # 棋子及其对应数字标识
 chess_number = {
@@ -45,14 +46,40 @@ def pos_to_grid(co_x, co_y):
 
 
 class DrawType:
+
+    # 红方棋子初始位置
+    red_chess_init = [
+        [11, 12, 13, 14, 15, 14, 13, 12, 11],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 16, 0, 0, 0, 0, 0, 16, 0],
+        [17, 0, 17, 0, 17, 0, 17, 0, 17],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [7, 0, 7, 0, 7, 0, 7, 0, 7],
+        [0, 6, 0, 0, 0, 0, 0, 6, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 2, 3, 4, 5, 4, 3, 2, 1],
+    ]
+
+    # 黑方初始棋子位置
+    black_chess_init = [
+        [1, 2, 3, 4, 5, 4, 3, 2, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 6, 0, 0, 0, 0, 0, 6, 0],
+        [7, 0, 7, 0, 7, 0, 7, 0, 7],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [17, 0, 17, 0, 17, 0, 17, 0, 17],
+        [0, 16, 0, 0, 0, 0, 0, 16, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [11, 12, 13, 14, 15, 14, 13, 12, 11],
+    ]
+
     # 初始化函数
     def __init__(self):
         # 逻辑相关
         # 运行次数统计
         self.times = 0
-
-        # 悔棋判断
-        self.undo = 0
 
         # 红方或黑方标志，0表示红方，1表示黑方
         self.side = 0
@@ -75,6 +102,9 @@ class DrawType:
         # 当前选中棋子可移动位置
         self.can_moves = []
 
+        # 悔棋功能中保存的上一步情况
+        self.withdraw_situation = [[]]
+
         # 棋子初始坐标
         self.chess_info = None
 
@@ -90,6 +120,8 @@ class DrawType:
         self.surrender = 0
         # 将军标识
         self.warn = 0
+        # 悔棋标识
+        self.undo = 0
 
         # 画面相关
         # 初始化pygame
@@ -300,13 +332,20 @@ class DrawType:
                 self.button_music.play()
                 self.surrender = 1
                 return
+
             # 点击悔棋按钮
             elif (self.withdraw_button1[0] < mouse_pos[0] < self.withdraw_button2[0]) and (
                     self.withdraw_button1[1] < mouse_pos[1] < self.withdraw_button2[1]):
-                self.withdraw_times -= 1
-                self.undo = 1
-                if self.withdraw_times < 0:
-                    self.withdraw_times = 0
+                if self.withdraw_times == 0:
+                    return
+                elif self.chess_info == self.withdraw_situation:
+                    return
+                elif self.side == 1:
+                    return
+                elif self.withdraw_times > 0:
+                    self.withdraw_times -= 1
+                    self.undo = 1
+                    return
 
             # 若未轮到本方
             elif self.able_move == 0:
@@ -364,6 +403,7 @@ class DrawType:
                 self.surrender = 0
                 self.lose = 0
                 self.withdraw_times = 2
+                self.undo = 0
                 self.image_selected = False
 
                 return
@@ -386,6 +426,8 @@ class DrawType:
 
         # 判断能否走子
         if next_pos in self.can_moves:
+            self.withdraw_situation = deepcopy(self.chess_info)
+
             # 判断是否将或帅被吃
             if self.chess_info[next_pos[0]][next_pos[1]] == 5:
                 print('帅已死')

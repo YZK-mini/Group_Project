@@ -1,3 +1,4 @@
+from copy import deepcopy
 import Draw_and_Sound
 import pickle
 from socket import *
@@ -43,7 +44,7 @@ class Side(Draw_and_Sound.DrawType):
         # 创建数据传输的类，需要本方的移动信息
         def create_mess(self, tag, temp_chess_info):
             self.tg = tag
-            self.chess_text = temp_chess_info
+            self.chess_text = deepcopy(temp_chess_info)
 
     # 初步连接处理
     def server_and_client(self, ps_tag):
@@ -75,9 +76,11 @@ class Side(Draw_and_Sound.DrawType):
 
             # 初始化棋子位置
             if self.side == 0:
-                self.chess_info = self.red_chess_init()
+                self.chess_info = deepcopy(self.red_chess_init)
+                self.withdraw_situation = deepcopy(self.red_chess_init)
             else:
-                self.chess_info = self.black_chess_init()
+                self.chess_info = deepcopy(self.black_chess_init)
+                self.withdraw_situation = deepcopy(self.black_chess_init)
 
             # 红方先行,黑方后行
             if self.side == 0:
@@ -105,9 +108,11 @@ class Side(Draw_and_Sound.DrawType):
 
         # 连接建立，初始化棋子位置
         if self.side == 0:
-            self.chess_info = self.red_chess_init()
+            self.chess_info = deepcopy(self.red_chess_init)
+            self.withdraw_situation = deepcopy(self.red_chess_init)
         else:
-            self.chess_info = self.black_chess_init()
+            self.chess_info = deepcopy(self.black_chess_init)
+            self.withdraw_situation = deepcopy(self.black_chess_init)
 
         # 红方先行,黑方后行
         if self.side == 0:
@@ -128,7 +133,6 @@ class Side(Draw_and_Sound.DrawType):
 
     # 发送
     def send_info(self, msg):
-        print(msg.tg, msg.chess_text)
         if self.start_or_join == 1:
             self.conn.send(pickle.dumps(msg))
         else:
@@ -195,7 +199,11 @@ class Side(Draw_and_Sound.DrawType):
             self.warn_music.play()
             return
 
-        rcv_data = msg.chess_text
+        # 收到对方悔棋的信号
+        elif msg.tg == 6:
+            self.able_move = 0
+
+        rcv_data = deepcopy(msg.chess_text)
 
         # 换方需对矩阵进行180度旋转
         for i in range(5):
@@ -206,10 +214,13 @@ class Side(Draw_and_Sound.DrawType):
 
         # 如果接收到的棋盘与已有棋盘不同，则更新棋盘
         if self.chess_info != rcv_data and self.tag == 2:
-            self.chess_info = rcv_data
+            self.chess_info = deepcopy(rcv_data)
             self.move_music.play()
-            # 轮到己方行动
-            self.able_move = 1
+            # 若本次修改不是对方悔棋的结果，则轮到己方行动
+            if msg.tg != 6:
+                self.able_move = 1
+            # 当对方行走后，无法悔棋
+            self.withdraw_situation = deepcopy(self.chess_info)
 
         return
 
@@ -233,10 +244,10 @@ class Side(Draw_and_Sound.DrawType):
         elif (ps_tag == 30 or ps_tag == 31 or ps_tag == 32) and self.tag == 2:
             # 还原棋盘
             if self.side == 0:
-                self.chess_info = self.red_chess_init()
+                self.chess_info = deepcopy(self.red_chess_init)
                 self.able_move = 1
             else:
-                self.chess_info = self.black_chess_init()
+                self.chess_info = deepcopy(self.black_chess_init)
                 self.able_move = 0
 
             return
@@ -275,43 +286,16 @@ class Side(Draw_and_Sound.DrawType):
                 msg.create_mess(5, self.chess_info)
                 self.send_info(msg)
 
+            # 若悔棋
             if self.undo == 1:
-                pass
+                self.chess_info = deepcopy(self.withdraw_situation)
+                self.undo = 0
+                self.able_move = 1
+                msg.create_mess(6, self.chess_info)
+                self.send_info(msg)
 
             # 绘制棋子
             self.draw_chess()
 
             # 绘制额外图片
             self.draw_picture()
-
-    # 返回红方初始棋子位置
-    @staticmethod
-    def red_chess_init():
-        return [
-            [11, 12, 13, 14, 15, 14, 13, 12, 11],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 16, 0, 0, 0, 0, 0, 16, 0],
-            [17, 0, 17, 0, 17, 0, 17, 0, 17],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [7, 0, 7, 0, 7, 0, 7, 0, 7],
-            [0, 6, 0, 0, 0, 0, 0, 6, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 2, 3, 4, 5, 4, 3, 2, 1],
-        ]
-
-    # 返回黑方初始棋子位置
-    @staticmethod
-    def black_chess_init():
-        return [
-            [1, 2, 3, 4, 5, 4, 3, 2, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 6, 0, 0, 0, 0, 0, 6, 0],
-            [7, 0, 7, 0, 7, 0, 7, 0, 7],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [17, 0, 17, 0, 17, 0, 17, 0, 17],
-            [0, 16, 0, 0, 0, 0, 0, 16, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [11, 12, 13, 14, 15, 14, 13, 12, 11],
-        ]
