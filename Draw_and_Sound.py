@@ -340,7 +340,7 @@ class DrawType:
                     return
                 elif self.chess_info == self.withdraw_situation:
                     return
-                elif self.side == 1:
+                elif self.able_move == 1:
                     return
                 elif self.withdraw_times > 0:
                     self.withdraw_times -= 1
