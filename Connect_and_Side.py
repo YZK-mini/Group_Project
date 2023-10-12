@@ -100,7 +100,7 @@ class Side(Draw_and_Sound.DrawType):
             # 启动receive线程
             self.receive_thread.start()
 
-    # 与waiting线程绑定的wait函数，用于等待都覅那个连接
+    # 与waiting线程绑定的wait函数，用于等待对方连接
     def waiting(self):
         print('Waiting')
         # 等待客户端连接

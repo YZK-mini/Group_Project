@@ -142,11 +142,11 @@ class DrawType:
 
         # 背景图片
         self.start_img = pygame.image.load('images/开始界面.png')
-        self.start_button1 = (128, 272)
-        self.start_button2 = (390, 349)
-        self.join_button1 = (126, 389)
-        self.join_button2 = (389, 462)
-        # 按钮’启动游戏‘左上（128，272）右下（390，349），按钮’加入游戏‘左上（126，389）右下（389，462）
+        self.start_button1 = (128, 344)
+        self.start_button2 = (390, 420)
+        self.join_button1 = (126, 454)
+        self.join_button2 = (389, 530)
+        # 按钮’启动游戏‘左上(128, 344) 右下(390, 420) ，按钮’加入游戏‘左上(126, 454）右下(389, 530)
 
         self.wait_img = pygame.image.load('images/等待界面.png')
         self.return_button1 = (165, 313)
