@@ -201,6 +201,8 @@ class Side(Draw_and_Sound.DrawType):
 
         # 收到对方悔棋的信号
         elif msg.tg == 6:
+            self.image_selected = False
+            self.choice = (-1, -1)
             self.able_move = 0
 
         rcv_data = deepcopy(msg.chess_text)
